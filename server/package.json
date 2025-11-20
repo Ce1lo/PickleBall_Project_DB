@@ -1,0 +1,16 @@
+{
+  "name": "pickleball-management",
+  "version": "1.0.0",
+  "description": "Ứng dụng quản lý sân pickleball với Express và MySQL",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "init-db": "node init_db.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "mysql2": "^3.15.3"
+  }
+}

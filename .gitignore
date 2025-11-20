@@ -1,0 +1,27 @@
+# node_modules
+node_modules
+
+# build
+build
+
+# logs
+logs
+
+# temp
+temp
+
+# cache
+cache
+
+# environment variables
+.env
+
+# editor settings
+.idea
+.vscode
+
+# dependencies
+dist
+
+# database
+database
