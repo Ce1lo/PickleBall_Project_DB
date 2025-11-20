@@ -29,18 +29,13 @@ const pool = mysql.createPool({
   database: process.env.MYSQL_DATABASE || 'pickleball',
   waitForConnections: true,
   connectionLimit: 10,
-  queueLimit: 0
+  queueLimit: 0,
+  timezone: '+07:00', // Set timezone to GMT+7 (Vietnam/Bangkok)
+  dateStrings: true // Return dates as strings to avoid UTC conversion
 });
 
-// Helper methods to execute statements against MySQL.  These mirror the
-// previous SQLite helpers but return objects compatible with the rest of
-// the application.  `runAsync` resolves with an object containing
-// `lastID` (the auto‑generated primary key) and `changes` (affected rows)
-// where appropriate.
 async function runAsync(sql, params = []) {
   const [result] = await pool.execute(sql, params);
-  // For INSERTs result.insertId will contain the new primary key; for
-  // UPDATE/DELETE result.affectedRows provides the number of changed rows.
   return { lastID: result.insertId, changes: result.affectedRows };
 }
 async function getAsync(sql, params = []) {
@@ -253,8 +248,46 @@ app.patch('/api/reservations/:id', async (req, res) => {
 app.delete('/api/reservations/:id', async (req, res) => {
   const id = parseInt(req.params.id, 10);
   try {
+    // Get the reservation details before deleting
+    const reservation = await getAsync(
+      'SELECT court_id, start_time, end_time FROM reservations WHERE id = ?',
+      [id]
+    );
+
+    if (!reservation) {
+      return res.status(404).json({ error: 'Reservation not found' });
+    }
+
+    // Delete the reservation
     await runAsync('DELETE FROM reservations WHERE id = ?', [id]);
-    res.json({ ok: true });
+
+    // Check if there are any waitlist entries for the same court and overlapping time
+    const waitlistEntries = await allAsync(
+      `SELECT w.id, w.court_id, w.player_id, w.start_time, w.end_time, w.priority
+       FROM waitlist w
+       WHERE w.court_id = ?
+         AND w.status = 'waiting'
+         AND NOT (w.end_time <= ? OR w.start_time >= ?)
+       ORDER BY w.priority DESC, w.created_at ASC
+       LIMIT 1`,
+      [reservation.court_id, reservation.start_time, reservation.end_time]
+    );
+
+    // If there's a waitlist entry, automatically create a reservation for them
+    if (waitlistEntries.length > 0) {
+      const waitlistEntry = waitlistEntries[0];
+
+      // Create new reservation from waitlist
+      await runAsync(
+        'INSERT INTO reservations (court_id, player_id, start_time, end_time, status, price_cents, payment_status) VALUES (?,?,?,?,?,?,?)',
+        [waitlistEntry.court_id, waitlistEntry.player_id, waitlistEntry.start_time, waitlistEntry.end_time, 'booked', 0, 'unpaid']
+      );
+
+      // Remove from waitlist
+      await runAsync('DELETE FROM waitlist WHERE id = ?', [waitlistEntry.id]);
+    }
+
+    res.json({ ok: true, waitlistPromoted: waitlistEntries.length > 0 });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

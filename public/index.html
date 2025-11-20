@@ -1295,22 +1295,13 @@
                 gridContainer.append($('<div class="card"></div>').append('<h3>Lịch theo giờ</h3>', table));
               }
             };
-            // set default date to the nearest reservation date, if available
+            // set default date to today
             (function setDefaultDate() {
-              const uniqueDates = [...new Set(this.data.map(r => r.start_time.slice(0, 10)))];
-              if (uniqueDates.length > 0) {
-                const todayStr = new Date().toISOString().slice(0, 10);
-                let bestDate = uniqueDates[0];
-                let minDiff = Infinity;
-                uniqueDates.forEach(dd => {
-                  const diff = Math.abs(new Date(dd) - new Date(todayStr));
-                  if (diff < minDiff) {
-                    minDiff = diff;
-                    bestDate = dd;
-                  }
-                });
-                dateInput.val(bestDate);
-              }
+              const now = new Date();
+              const y = now.getFullYear();
+              const m = String(now.getMonth() + 1).padStart(2, '0');
+              const d = String(now.getDate()).padStart(2, '0');
+              dateInput.val(`${y}-${m}-${d}`);
             }).call(this);
             // initial render
             renderListAndGrid();
