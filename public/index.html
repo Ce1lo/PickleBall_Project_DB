@@ -5,8 +5,80 @@
   <meta charset="utf-8" />
   <title>Quản lý CLB Pickleball</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Google Fonts - Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: '#f0fdfa',
+              100: '#ccfbf1',
+              200: '#99f6e4',
+              300: '#5eead4',
+              400: '#2dd4bf',
+              500: '#14b8a6',
+              600: '#0d9488',
+              700: '#0f766e',
+              800: '#115e59',
+              900: '#134e4a',
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <style>
+    /* Tailwind Custom Styles */
+    .nav-tab {
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.7);
+      transition: all 0.2s ease;
+      white-space: nowrap;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      font-size: 14px;
+    }
+
+    .nav-tab:hover {
+      color: white;
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .nav-tab.active {
+      background-color: white;
+      color: #0f766e;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      font-weight: 600;
+    }
+
+    /* Hide scrollbar but keep functionality */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    /* Fallback for old :root variables */
     :root {
       --bg: #0f172a;
       --card: #1e293b;
@@ -27,12 +99,42 @@
       box-sizing: border-box;
     }
 
+    /* Smooth scrolling */
+    html {
+      scroll-behavior: smooth;
+    }
+
     body {
       margin: 0;
       background: var(--bg);
       color: var(--text);
       font: 14px/1.6 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu,
         "Helvetica Neue", Arial;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.5);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(71, 85, 105, 0.8);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(20, 184, 166, 0.6);
+    }
+
+    /* Selection color */
+    ::selection {
+      background: rgba(20, 184, 166, 0.3);
+      color: white;
     }
 
     a {
@@ -109,6 +211,7 @@
       flex-wrap: wrap;
     }
 
+    /* OLD LAYOUT CSS - Commented out for Tailwind redesign
     .container {
       display: grid;
       grid-template-columns: 1fr 8px 360px;
@@ -148,119 +251,126 @@
       overflow: auto;
       padding: 20px;
     }
+    */
 
+    /* Modern Card Styles */
     .card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      box-shadow: var(--shadow);
-      margin-bottom: 24px;
-      padding: 24px;
-      transition: var(--transition);
+      background: rgba(30, 41, 59, 0.5);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(71, 85, 105, 0.5);
+      border-radius: 1rem;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+      margin-bottom: 1.5rem;
+      padding: 1.5rem;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .card:hover {
-      box-shadow: var(--shadow-lg);
-      border-color: rgba(16, 185, 129, 0.3);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      border-color: rgba(20, 184, 166, 0.5);
+      transform: translateY(-2px);
     }
 
     .card h2 {
       margin-top: 0;
-      margin-bottom: 16px;
-      font-size: 20px;
-      font-weight: 600;
-      color: var(--text);
+      margin-bottom: 1rem;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: white;
+      letter-spacing: -0.025em;
     }
 
     .card h3 {
       margin-top: 0;
-      margin-bottom: 12px;
-      font-size: 16px;
+      margin-bottom: 1rem;
+      font-size: 1.25rem;
       font-weight: 600;
-      color: var(--text);
+      color: white;
     }
 
     .toolbar {
       display: flex;
       flex-wrap: wrap;
-      gap: 12px;
+      gap: 0.75rem;
       align-items: center;
       margin-bottom: 20px;
     }
 
+    /* Modern Input & Select Styles */
     .toolbar input,
     .toolbar select {
-      background: var(--bg);
-      border: 1px solid var(--border);
-      color: var(--text);
-      padding: 10px 14px;
-      border-radius: 8px;
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(71, 85, 105, 0.6);
+      color: white;
+      padding: 0.625rem 1rem;
+      border-radius: 0.5rem;
       outline: none;
-      transition: var(--transition);
+      transition: all 0.2s ease;
       min-height: 44px;
     }
 
     .toolbar input:focus,
     .toolbar select:focus {
-      border-color: var(--brand);
-      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+      border-color: #14b8a6;
+      box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.15);
+      background: rgba(15, 23, 42, 1);
     }
 
     .toolbar input::placeholder {
-      color: var(--muted);
+      color: rgb(148, 163, 184);
     }
 
+    /* Modern Button Styles */
     .btn {
-      padding: 10px 16px;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      background: #1e293b;
-      color: var(--text);
+      padding: 0.625rem 1rem;
+      border-radius: 0.5rem;
+      border: none;
+      background: rgb(51, 65, 85);
+      color: white;
       cursor: pointer;
       font-weight: 500;
-      font-size: 14px;
+      font-size: 0.875rem;
       line-height: 1.5;
-      transition: var(--transition);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
       min-height: 44px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
+      gap: 0.5rem;
     }
 
     .btn:hover:not(:disabled) {
       transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-      background: #334155;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+      background: rgb(71, 85, 105);
     }
 
     .btn:active:not(:disabled) {
-      transform: translateY(0);
+      transform: scale(0.95);
     }
 
     .btn.primary {
-      background: var(--brand);
-      border-color: var(--brand);
-      color: #ffffff;
-      font-weight: 600;
+      background: linear-gradient(135deg, #14b8a6 0%, #10b981 100%);
+      border-color: transparent;
+      box-shadow: 0 4px 6px -1px rgba(20, 184, 166, 0.3);
     }
 
     .btn.primary:hover:not(:disabled) {
-      background: var(--brand-hover);
-      border-color: var(--brand-hover);
-      box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4);
+      background: linear-gradient(135deg, #0d9488 0%, #059669 100%);
+      box-shadow: 0 10px 15px -3px rgba(20, 184, 166, 0.5);
     }
 
     .btn.danger {
-      background: var(--danger);
-      border-color: var(--danger);
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      border-color: transparent;
       color: #ffffff;
       font-weight: 600;
+      box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.3);
     }
 
     .btn.danger:hover:not(:disabled) {
-      background: var(--danger-hover);
-      border-color: var(--danger-hover);
-      box-shadow: 0 4px 16px rgba(239, 68, 68, 0.4);
+      background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+      box-shadow: 0 10px 15px -3px rgba(239, 68, 68, 0.5);
     }
 
     .btn:disabled {
@@ -269,92 +379,121 @@
       transform: none;
     }
 
+    /* Modern Table Styles */
     table {
       width: 100%;
       border-collapse: separate;
-      border-spacing: 0 8px;
+      border-spacing: 0 0.5rem;
     }
 
     thead th {
-      font-weight: 600;
       text-align: left;
-      color: var(--muted);
-      padding: 8px 12px;
-      font-size: 13px;
+      color: rgb(148, 163, 184);
+      padding: 0.75rem 1rem;
+      font-size: 0.75rem;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.05em;
+      font-weight: 600;
     }
 
     tbody td {
-      background: var(--bg);
-      border: 1px solid var(--border);
-      padding: 14px 12px;
-      transition: var(--transition);
+      background: rgba(15, 23, 42, 0.5);
+      border: 1px solid rgba(71, 85, 105, 0.3);
+      padding: 1rem;
+      transition: all 0.2s ease;
+      color: rgb(226, 232, 240);
     }
 
     tbody tr td:first-child {
-      border-top-left-radius: 8px;
-      border-bottom-left-radius: 8px;
+      border-top-left-radius: 0.5rem;
+      border-bottom-left-radius: 0.5rem;
     }
 
     tbody tr td:last-child {
-      border-top-right-radius: 8px;
-      border-bottom-right-radius: 8px;
+      border-top-right-radius: 0.5rem;
+      border-bottom-right-radius: 0.5rem;
     }
 
     tbody tr:hover td {
-      background: #1e293b;
-      border-color: rgba(16, 185, 129, 0.3);
+      background: rgba(30, 41, 59, 0.8);
+      border-color: rgba(20, 184, 166, 0.4);
+      box-shadow: 0 0 15px rgba(20, 184, 166, 0.1);
     }
 
     tbody td.actions {
       white-space: nowrap;
       text-align: right;
-      display: flex;
-      gap: 8px;
-      justify-content: flex-end;
-      align-items: center;
     }
 
-    .badge {
-      display: inline-block;
-      padding: 6px 12px;
-      border-radius: 6px;
+    tbody td.actions .action-wrapper {
+      display: inline-flex;
+      gap: 1rem;
+      align-items: center;
+      justify-content: flex-end;
+      width: 100%;
+    }
+
+    tbody td.actions .btn {
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+      min-height: auto;
       font-weight: 600;
-      font-size: 11px;
+    }
+
+    /* Modern Badge Styles */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.5rem;
+      font-weight: 600;
+      font-size: 0.6875rem;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin: 0 4px;
+      letter-spacing: 0.025em;
+      margin: 0;
+      white-space: nowrap;
     }
 
     .badge.active {
-      background: rgba(16, 185, 129, 0.2);
-      border: 1px solid var(--brand);
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.5);
       color: #6ee7b7;
     }
 
     .badge.expired {
-      background: rgba(239, 68, 68, 0.2);
-      border: 1px solid var(--danger);
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.5);
       color: #fca5a5;
     }
 
     .badge.none {
-      background: rgba(148, 163, 184, 0.2);
-      color: var(--muted);
-      border: 1px solid #475569;
+      background: rgba(148, 163, 184, 0.15);
+      color: rgb(148, 163, 184);
+      border: 1px solid rgba(148, 163, 184, 0.3);
     }
 
     .badge.paid {
-      background: rgba(16, 185, 129, 0.2);
-      border: 1px solid var(--brand);
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.5);
       color: #6ee7b7;
     }
 
     .badge.unpaid {
-      background: rgba(239, 68, 68, 0.2);
-      border: 1px solid var(--danger);
-      color: #fca5a5;
+      background: rgba(251, 191, 36, 0.15);
+      border: 1px solid rgba(251, 191, 36, 0.5);
+      color: #fcd34d;
+    }
+
+    .badge.booked {
+      background: rgba(59, 130, 246, 0.15);
+      border: 1px solid rgba(59, 130, 246, 0.5);
+      color: #93c5fd;
+    }
+
+    .badge.pending {
+      background: rgba(251, 191, 36, 0.15);
+      border: 1px solid rgba(251, 191, 36, 0.5);
+      color: #fcd34d;
     }
 
     /* Schedule grid for reservations */
@@ -409,6 +548,7 @@
     }
 
     /* Drawer editor */
+    /* Modern Drawer Styles */
     .drawer {
       position: fixed;
       top: 68px;
@@ -416,9 +556,10 @@
       width: 440px;
       max-width: 100vw;
       height: calc(100dvh - 68px);
-      background: var(--panel);
-      border-left: 1px solid var(--border);
-      box-shadow: var(--shadow-lg);
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(20px);
+      border-left: 1px solid rgba(71, 85, 105, 0.5);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
       transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       z-index: 50;
       display: flex;
@@ -430,116 +571,158 @@
     }
 
     .drawer header {
-      padding: 20px;
-      border-bottom: 1px solid var(--border);
+      padding: 1.5rem;
+      border-bottom: 1px solid rgba(71, 85, 105, 0.5);
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: var(--card);
+      background: linear-gradient(135deg, rgba(20, 184, 166, 0.1) 0%, rgba(16, 185, 129, 0.1) 100%);
     }
 
     .drawer h3 {
       margin: 0;
-      font-size: 18px;
-      font-weight: 600;
-      color: var(--text);
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: white;
+      letter-spacing: -0.025em;
     }
 
     .drawer .content {
-      padding: 20px;
+      padding: 1.5rem;
       flex-grow: 1;
       overflow: auto;
     }
 
-    .field {
-      margin-bottom: 20px;
-      display: flex;
-      flex-direction: column;
+    .drawer .content label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: rgb(226, 232, 240);
+      font-size: 0.875rem;
     }
 
-    .field label {
-      color: var(--muted);
-      font-size: 13px;
-      font-weight: 500;
-      margin-bottom: 8px;
-      letter-spacing: 0.3px;
-    }
-
-    .field input,
-    .field select,
-    .field textarea {
-      background: var(--bg);
-      border: 1px solid var(--border);
-      color: var(--text);
-      padding: 12px 14px;
-      border-radius: 8px;
+    .drawer .content input,
+    .drawer .content select,
+    .drawer .content textarea {
+      width: 100%;
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(71, 85, 105, 0.6);
+      color: white;
+      padding: 0.75rem;
+      border-radius: 0.5rem;
+      margin-bottom: 1.25rem;
       outline: none;
-      transition: var(--transition);
-      font-size: 14px;
+      transition: all 0.2s ease;
+      font-size: 0.875rem;
     }
 
-    .field input:focus,
-    .field select:focus,
-    .field textarea:focus {
-      border-color: var(--brand);
-      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    .drawer .content input:focus,
+    .drawer .content select:focus,
+    .drawer .content textarea:focus {
+      border-color: #14b8a6;
+      box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.15);
+      background: rgba(15, 23, 42, 1);
     }
 
-    .field textarea {
+    .drawer .content input::placeholder,
+    .drawer .content textarea::placeholder {
+      color: rgb(148, 163, 184);
+    }
+
+    .drawer .content textarea {
+      min-height: 100px;
       resize: vertical;
-      min-height: 80px;
+      font-family: inherit;
+    }
+
+    .drawer .content .form-group {
+      margin-bottom: 1.5rem;
     }
 
     .drawer footer {
-      padding: 20px;
-      border-top: 1px solid var(--border);
+      padding: 1.5rem;
+      border-top: 1px solid rgba(71, 85, 105, 0.5);
       display: flex;
-      justify-content: flex-end;
-      gap: 12px;
-      background: var(--card);
+      gap: 0.75rem;
+      background: rgba(15, 23, 42, 0.8);
     }
 
-    /* Toast notifications */
+    .drawer footer .btn {
+      flex: 1;
+    }
+
+    /* Modern Toast Notifications */
     .toast-container {
       position: fixed;
-      top: 80px;
-      right: 20px;
+      bottom: 2rem;
+      right: 2rem;
       z-index: 100;
       display: flex;
       flex-direction: column;
-      gap: 12px;
-      max-width: 400px;
+      gap: 0.75rem;
+      max-width: 24rem;
     }
 
     .toast {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 16px 20px;
-      box-shadow: var(--shadow-lg);
+      background: rgba(30, 41, 59, 0.95);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(71, 85, 105, 0.5);
+      border-radius: 0.75rem;
+      padding: 1rem 1.25rem;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4);
       display: flex;
       align-items: center;
-      gap: 12px;
-      animation: slideIn 0.3s ease;
+      gap: 0.75rem;
+      animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      color: white;
     }
 
     .toast.success {
-      border-left: 4px solid var(--brand);
+      border-left: 4px solid #14b8a6;
+      box-shadow: 0 20px 25px -5px rgba(20, 184, 166, 0.3);
+    }
+
+    .toast.success::before {
+      content: "✓";
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 1.5rem;
+      height: 1.5rem;
+      background: #14b8a6;
+      border-radius: 9999px;
+      font-weight: bold;
+      flex-shrink: 0;
     }
 
     .toast.error {
-      border-left: 4px solid var(--danger);
+      border-left: 4px solid #ef4444;
+      box-shadow: 0 20px 25px -5px rgba(239, 68, 68, 0.3);
+    }
+
+    .toast.error::before {
+      content: "✕";
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 1.5rem;
+      height: 1.5rem;
+      background: #ef4444;
+      border-radius: 9999px;
+      font-weight: bold;
+      flex-shrink: 0;
     }
 
     .toast-message {
       flex: 1;
-      font-size: 14px;
+      font-size: 0.875rem;
       line-height: 1.5;
+      font-weight: 500;
     }
 
     @keyframes slideIn {
       from {
-        transform: translateX(400px);
+        transform: translateX(120%);
         opacity: 0;
       }
 
@@ -622,44 +805,57 @@
   </style>
 </head>
 
-<body>
-  <header class="topbar">
-    <h1>Pickleball Admin</h1>
-    <nav>
-      <ul>
-        <li><button data-section="players" class="active">Hội viên</button></li>
-        <li><button data-section="courts">Sân</button></li>
-        <li><button data-section="reservations">Đặt sân</button></li>
-        <li><button data-section="waitlist">Danh sách chờ</button></li>
-        <li><button data-section="events">Sự kiện</button></li>
-        <li><button data-section="memberships">Thẻ hội viên</button></li>
-        <li><button data-section="payments">Thanh toán</button></li>
-        <li><button data-section="notifications">Nhắc nhở</button></li>
-        <li><button data-section="messages">Tin nhắn</button></li>
-      </ul>
-    </nav>
-  </header>
-  <div class="container">
-    <div class="left">
-      <!-- dynamic content -->
-      <div id="section-players" class="section"></div>
-      <div id="section-courts" class="section" style="display:none"></div>
-      <div id="section-reservations" class="section" style="display:none"></div>
-      <div id="section-waitlist" class="section" style="display:none"></div>
-      <div id="section-events" class="section" style="display:none"></div>
-      <div id="section-memberships" class="section" style="display:none"></div>
-      <div id="section-payments" class="section" style="display:none"></div>
-      <div id="section-notifications" class="section" style="display:none"></div>
-      <div id="section-messages" class="section" style="display:none"></div>
-      <!-- Báo cáo tab removed -->
-    </div>
-    <div class="handle" id="drag-handle"></div>
-    <div class="right" id="right-panel">
-      <div id="schedule-view" style="display:none">
-        <h3>Lịch đặt sân (7 ngày tới)</h3>
-        <div id="schedule-container"></div>
+<body class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 min-h-screen font-sans text-slate-100">
+  <header class="bg-gradient-to-r from-primary-600 to-emerald-500 shadow-2xl sticky top-0 z-40">
+    <div class="container mx-auto px-6 py-4">
+      <div class="flex items-center justify-between mb-4">
+        <h1 class="text-3xl font-bold text-white flex items-center gap-3">
+          <span class="text-4xl">🎾</span>
+          Pickleball Admin
+        </h1>
       </div>
-      <!-- Báo cáo view removed -->
+
+      <!-- Navigation Tabs -->
+      <nav class="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
+        <ul class="flex gap-2">
+          <li><button data-section="players" class="nav-tab active">Hội viên</button></li>
+          <li><button data-section="courts" class="nav-tab">Sân</button></li>
+          <li><button data-section="reservations" class="nav-tab">Đặt sân</button></li>
+          <li><button data-section="waitlist" class="nav-tab">Danh sách chờ</button></li>
+          <li><button data-section="events" class="nav-tab">Sự kiện</button></li>
+          <li><button data-section="memberships" class="nav-tab">Thẻ hội viên</button></li>
+          <li><button data-section="payments" class="nav-tab">Thanh toán</button></li>
+          <li><button data-section="notifications" class="nav-tab">Nhắc nhở</button></li>
+          <li><button data-section="messages" class="nav-tab">Tin nhắn</button></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Content Container -->
+  <div class="container mx-auto px-6 py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Left: Main Content (2/3 width on large screens) -->
+      <div class="lg:col-span-2 space-y-6">
+        <!-- dynamic content -->
+        <div id="section-players" class="section"></div>
+        <div id="section-courts" class="section" style="display:none"></div>
+        <div id="section-reservations" class="section" style="display:none"></div>
+        <div id="section-waitlist" class="section" style="display:none"></div>
+        <div id="section-events" class="section" style="display:none"></div>
+        <div id="section-memberships" class="section" style="display:none"></div>
+        <div id="section-payments" class="section" style="display:none"></div>
+        <div id="section-notifications" class="section" style="display:none"></div>
+        <div id="section-messages" class="section" style="display:none"></div>
+      </div>
+
+      <!-- Right: Schedule Sidebar (1/3 width on large screens) -->
+      <div class="lg:col-span-1" id="right-panel">
+        <div id="schedule-view" style="display:none" class="space-y-4">
+          <h3 class="text-xl font-bold text-white">Lịch đặt sân (7 ngày tới)</h3>
+          <div id="schedule-container"></div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -680,1171 +876,1173 @@
   <div class="toast-container" id="toast-container"></div>
 
   <script>
-    (() => {
-      const api = {
-        players: {
-          list: () => $.getJSON('/api/players'),
-          create: (d) => $.ajax({ url: '/api/players', method: 'POST', data: JSON.stringify(d), contentType: 'application/json' }),
-          patch: (id, d) => $.ajax({ url: '/api/players/' + id, method: 'PATCH', data: JSON.stringify(d), contentType: 'application/json' }),
-          remove: (id) => $.ajax({ url: '/api/players/' + id, method: 'DELETE' })
-        },
-        courts: {
-          list: () => $.getJSON('/api/courts'),
-          create: (d) => $.ajax({ url: '/api/courts', method: 'POST', data: JSON.stringify(d), contentType: 'application/json' }),
-          patch: (id, d) => $.ajax({ url: '/api/courts/' + id, method: 'PATCH', data: JSON.stringify(d), contentType: 'application/json' }),
-          remove: (id) => $.ajax({ url: '/api/courts/' + id, method: 'DELETE' })
-        },
-        reservations: {
-          list: (date) => $.getJSON('/api/reservations' + (date ? ('?date=' + date) : '')),
-          create: (d) => $.ajax({ url: '/api/reservations', method: 'POST', data: JSON.stringify(d), contentType: 'application/json' }),
-          patch: (id, d) => $.ajax({ url: '/api/reservations/' + id, method: 'PATCH', data: JSON.stringify(d), contentType: 'application/json' }),
-          remove: (id) => $.ajax({ url: '/api/reservations/' + id, method: 'DELETE' })
-        },
-        waitlist: {
-          list: () => $.getJSON('/api/waitlist'),
-          create: (d) => $.ajax({ url: '/api/waitlist', method: 'POST', data: JSON.stringify(d), contentType: 'application/json' }),
-          patch: (id, d) => $.ajax({ url: '/api/waitlist/' + id, method: 'PATCH', data: JSON.stringify(d), contentType: 'application/json' }),
-          remove: (id) => $.ajax({ url: '/api/waitlist/' + id, method: 'DELETE' })
-        },
-        events: {
-          list: () => $.getJSON('/api/events'),
-          create: (d) => $.ajax({ url: '/api/events', method: 'POST', data: JSON.stringify(d), contentType: 'application/json' }),
-          patch: (id, d) => $.ajax({ url: '/api/events/' + id, method: 'PATCH', data: JSON.stringify(d), contentType: 'application/json' }),
-          remove: (id) => $.ajax({ url: '/api/events/' + id, method: 'DELETE' }),
-          registrations: (eid) => $.getJSON('/api/events/' + eid + '/registrations'),
-          addRegistration: (eid, d) => $.ajax({ url: '/api/events/' + eid + '/registrations', method: 'POST', data: JSON.stringify(d), contentType: 'application/json' }),
-          updateRegistration: (id, d) => $.ajax({ url: '/api/event-registrations/' + id, method: 'PATCH', data: JSON.stringify(d), contentType: 'application/json' }),
-          removeRegistration: (id) => $.ajax({ url: '/api/event-registrations/' + id, method: 'DELETE' })
-        },
-        membershipPlans: {
-          list: () => $.getJSON('/api/membership-plans'),
-          create: (d) => $.ajax({ url: '/api/membership-plans', method: 'POST', data: JSON.stringify(d), contentType: 'application/json' }),
-          patch: (id, d) => $.ajax({ url: '/api/membership-plans/' + id, method: 'PATCH', data: JSON.stringify(d), contentType: 'application/json' }),
-          remove: (id) => $.ajax({ url: '/api/membership-plans/' + id, method: 'DELETE' })
-        },
-        memberships: {
-          list: () => $.getJSON('/api/memberships'),
-          create: (d) => $.ajax({ url: '/api/memberships', method: 'POST', data: JSON.stringify(d), contentType: 'application/json' }),
-          patch: (id, d) => $.ajax({ url: '/api/memberships/' + id, method: 'PATCH', data: JSON.stringify(d), contentType: 'application/json' }),
-          remove: (id) => $.ajax({ url: '/api/memberships/' + id, method: 'DELETE' })
-        },
-        payments: {
-          list: () => $.getJSON('/api/payments'),
-          create: (d) => $.ajax({ url: '/api/payments', method: 'POST', data: JSON.stringify(d), contentType: 'application/json' }),
-          patch: (id, d) => $.ajax({ url: '/api/payments/' + id, method: 'PATCH', data: JSON.stringify(d), contentType: 'application/json' }),
-          remove: (id) => $.ajax({ url: '/api/payments/' + id, method: 'DELETE' })
-        },
-        notifications: {
-          list: () => $.getJSON('/api/notifications-queue'),
-          create: (d) => $.ajax({ url: '/api/notifications-queue', method: 'POST', data: JSON.stringify(d), contentType: 'application/json' }),
-          patch: (id, d) => $.ajax({ url: '/api/notifications-queue/' + id, method: 'PATCH', data: JSON.stringify(d), contentType: 'application/json' }),
-          remove: (id) => $.ajax({ url: '/api/notifications-queue/' + id, method: 'DELETE' })
-        },
-        messages: {
-          list: () => $.getJSON('/api/messages'),
-          create: (d) => $.ajax({ url: '/api/messages', method: 'POST', data: JSON.stringify(d), contentType: 'application/json' })
-        },
-        reports: {
-          membership: () => $.getJSON('/api/report/membership'),
-          usage: () => $.getJSON('/api/report/reservations-usage'),
-          revenue: () => $.getJSON('/api/report/revenue'),
-          eventsCalendar: () => $.getJSON('/api/report/events-calendar'),
-          messages: () => $.getJSON('/api/report/messages-history'),
-          schedule: () => $.getJSON('/api/report/schedule')
+      (() => {
+        const api = {
+          players: {
+            list: () => $.getJSON('/api/players'),
+            create: (d) => $.ajax({ url: '/api/players', method: 'POST', data: JSON.stringify(d), contentType: 'application/json' }),
+            patch: (id, d) => $.ajax({ url: '/api/players/' + id, method: 'PATCH', data: JSON.stringify(d), contentType: 'application/json' }),
+            remove: (id) => $.ajax({ url: '/api/players/' + id, method: 'DELETE' })
+          },
+          courts: {
+            list: () => $.getJSON('/api/courts'),
+            create: (d) => $.ajax({ url: '/api/courts', method: 'POST', data: JSON.stringify(d), contentType: 'application/json' }),
+            patch: (id, d) => $.ajax({ url: '/api/courts/' + id, method: 'PATCH', data: JSON.stringify(d), contentType: 'application/json' }),
+            remove: (id) => $.ajax({ url: '/api/courts/' + id, method: 'DELETE' })
+          },
+          reservations: {
+            list: (date) => $.getJSON('/api/reservations' + (date ? ('?date=' + date) : '')),
+            create: (d) => $.ajax({ url: '/api/reservations', method: 'POST', data: JSON.stringify(d), contentType: 'application/json' }),
+            patch: (id, d) => $.ajax({ url: '/api/reservations/' + id, method: 'PATCH', data: JSON.stringify(d), contentType: 'application/json' }),
+            remove: (id) => $.ajax({ url: '/api/reservations/' + id, method: 'DELETE' })
+          },
+          waitlist: {
+            list: () => $.getJSON('/api/waitlist'),
+            create: (d) => $.ajax({ url: '/api/waitlist', method: 'POST', data: JSON.stringify(d), contentType: 'application/json' }),
+            patch: (id, d) => $.ajax({ url: '/api/waitlist/' + id, method: 'PATCH', data: JSON.stringify(d), contentType: 'application/json' }),
+            remove: (id) => $.ajax({ url: '/api/waitlist/' + id, method: 'DELETE' })
+          },
+          events: {
+            list: () => $.getJSON('/api/events'),
+            create: (d) => $.ajax({ url: '/api/events', method: 'POST', data: JSON.stringify(d), contentType: 'application/json' }),
+            patch: (id, d) => $.ajax({ url: '/api/events/' + id, method: 'PATCH', data: JSON.stringify(d), contentType: 'application/json' }),
+            remove: (id) => $.ajax({ url: '/api/events/' + id, method: 'DELETE' }),
+            registrations: (eid) => $.getJSON('/api/events/' + eid + '/registrations'),
+            addRegistration: (eid, d) => $.ajax({ url: '/api/events/' + eid + '/registrations', method: 'POST', data: JSON.stringify(d), contentType: 'application/json' }),
+            updateRegistration: (id, d) => $.ajax({ url: '/api/event-registrations/' + id, method: 'PATCH', data: JSON.stringify(d), contentType: 'application/json' }),
+            removeRegistration: (id) => $.ajax({ url: '/api/event-registrations/' + id, method: 'DELETE' })
+          },
+          membershipPlans: {
+            list: () => $.getJSON('/api/membership-plans'),
+            create: (d) => $.ajax({ url: '/api/membership-plans', method: 'POST', data: JSON.stringify(d), contentType: 'application/json' }),
+            patch: (id, d) => $.ajax({ url: '/api/membership-plans/' + id, method: 'PATCH', data: JSON.stringify(d), contentType: 'application/json' }),
+            remove: (id) => $.ajax({ url: '/api/membership-plans/' + id, method: 'DELETE' })
+          },
+          memberships: {
+            list: () => $.getJSON('/api/memberships'),
+            create: (d) => $.ajax({ url: '/api/memberships', method: 'POST', data: JSON.stringify(d), contentType: 'application/json' }),
+            patch: (id, d) => $.ajax({ url: '/api/memberships/' + id, method: 'PATCH', data: JSON.stringify(d), contentType: 'application/json' }),
+            remove: (id) => $.ajax({ url: '/api/memberships/' + id, method: 'DELETE' })
+          },
+          payments: {
+            list: () => $.getJSON('/api/payments'),
+            create: (d) => $.ajax({ url: '/api/payments', method: 'POST', data: JSON.stringify(d), contentType: 'application/json' }),
+            patch: (id, d) => $.ajax({ url: '/api/payments/' + id, method: 'PATCH', data: JSON.stringify(d), contentType: 'application/json' }),
+            remove: (id) => $.ajax({ url: '/api/payments/' + id, method: 'DELETE' })
+          },
+          notifications: {
+            list: () => $.getJSON('/api/notifications-queue'),
+            create: (d) => $.ajax({ url: '/api/notifications-queue', method: 'POST', data: JSON.stringify(d), contentType: 'application/json' }),
+            patch: (id, d) => $.ajax({ url: '/api/notifications-queue/' + id, method: 'PATCH', data: JSON.stringify(d), contentType: 'application/json' }),
+            remove: (id) => $.ajax({ url: '/api/notifications-queue/' + id, method: 'DELETE' })
+          },
+          messages: {
+            list: () => $.getJSON('/api/messages'),
+            create: (d) => $.ajax({ url: '/api/messages', method: 'POST', data: JSON.stringify(d), contentType: 'application/json' })
+          },
+          reports: {
+            membership: () => $.getJSON('/api/report/membership'),
+            usage: () => $.getJSON('/api/report/reservations-usage'),
+            revenue: () => $.getJSON('/api/report/revenue'),
+            eventsCalendar: () => $.getJSON('/api/report/events-calendar'),
+            messages: () => $.getJSON('/api/report/messages-history'),
+            schedule: () => $.getJSON('/api/report/schedule')
+          }
+        };
+
+        // Toast notification helper
+        function showToast(message, type = 'success') {
+          const container = $('#toast-container');
+          const toast = $('<div class="toast"></div>').addClass(type);
+          toast.append(`<div class="toast-message">${message}</div>`);
+          container.append(toast);
+
+          setTimeout(() => {
+            toast.css('opacity', '0');
+            setTimeout(() => toast.remove(), 300);
+          }, 3000);
         }
-      };
 
-      // Toast notification helper
-      function showToast(message, type = 'success') {
-        const container = $('#toast-container');
-        const toast = $('<div class="toast"></div>').addClass(type);
-        toast.append(`<div class="toast-message">${message}</div>`);
-        container.append(toast);
-
-        setTimeout(() => {
-          toast.css('opacity', '0');
-          setTimeout(() => toast.remove(), 300);
-        }, 3000);
-      }
-
-      // Currency formatter helper
-      function formatCurrency(cents) {
-        if (cents == null) return '0 ₫';
-        const dong = cents; // already in dong, not cents
-        return dong.toLocaleString('vi-VN') + ' ₫';
-      }
-
-      // Helper to render table rows for generic data
-      function renderTable(container, columns, data, opts = {}) {
-        const thead = $('<thead><tr></tr></thead>');
-        columns.forEach(col => {
-          thead.find('tr').append(`<th>${col.label}</th>`);
-        });
-        if (opts.actions) {
-          thead.find('tr').append('<th class="actions"></th>');
+        // Currency formatter helper
+        function formatCurrency(cents) {
+          if (cents == null) return '0 ₫';
+          const dong = cents; // already in dong, not cents
+          return dong.toLocaleString('vi-VN') + ' ₫';
         }
-        const tbody = $('<tbody></tbody>');
-        if (data.length === 0) {
-          tbody.append(`<tr><td colspan="${columns.length + (opts.actions ? 1 : 0)}" style="color:var(--muted);padding:20px;text-align:center;border:1px dashed var(--border);border-radius:8px">Không có dữ liệu</td></tr>`);
-        } else {
-          data.forEach(row => {
-            const tr = $('<tr></tr>').attr('data-id', row.id);
-            // Allow caller to assign custom CSS classes per row (e.g. highlight recent reservations)
-            if (opts.rowClass) {
-              const cls = opts.rowClass(row);
-              if (cls) tr.addClass(cls);
-            }
-            columns.forEach(col => {
-              const val = row[col.key];
-              // Format expiry badge
-              if (col.key === 'status' && opts.badge) {
-                const cls = row.status;
-                tr.append(`<td><span class="badge ${cls}">${val}</span></td>`);
-              } else {
-                tr.append(`<td>${val != null ? val : ''}</td>`);
-              }
-            });
-            if (opts.actions) {
-              const td = $('<td class="actions"></td>');
-              if (opts.onEdit) {
-                td.append(`<button class="btn" data-action="edit">Sửa</button>`);
-              }
-              if (opts.onDelete) {
-                td.append(`<button class="btn danger" data-action="delete">Xoá</button>`);
-              }
-              // Append payment button or badge if enabled
-              if (opts.payButton) {
-                if (row.payment_status && row.payment_status === 'paid') {
-                  td.append(`<span class="badge paid">Đã thanh toán</span>`);
-                } else {
-                  td.append(`<button class="btn primary" data-action="pay">Thanh toán</button>`);
-                }
-              }
-              tr.append(td);
-            }
-            tbody.append(tr);
+
+        // Helper to render table rows for generic data
+        function renderTable(container, columns, data, opts = {}) {
+          const thead = $('<thead><tr></tr></thead>');
+          columns.forEach(col => {
+            thead.find('tr').append(`<th>${col.label}</th>`);
           });
-        }
-        container.empty().append($('<table></table>').append(thead).append(tbody));
-      }
-
-      // Drawer handling
-      let drawerMode = null; // e.g. 'players', 'courts'
-      let currentId = null;
-      let originalRecord = null;
-      function openDrawer(title, record, mode) {
-        drawerMode = mode;
-        currentId = record ? record.id : null;
-        originalRecord = record ? { ...record } : null;
-        $('#drawer-title').text(title);
-        $('#drawer-content').empty();
-        // dynamic form fields based on mode
-        const fieldsDef = modules[mode].fields;
-        fieldsDef.forEach(f => {
-          const field = $('<div class="field"></div>');
-          field.append(`<label>${f.label}</label>`);
-          let input;
-          if (f.type === 'select') {
-            input = $('<select></select>').attr('id', 'f_' + f.key);
-            (f.options || []).forEach(opt => {
-              input.append(`<option value="${opt.value}">${opt.text}</option>`);
-            });
-          } else if (f.type === 'textarea') {
-            input = $('<textarea></textarea>').attr('id', 'f_' + f.key).attr('rows', 3);
+          if (opts.actions) {
+            thead.find('tr').append('<th class="actions"></th>');
+          }
+          const tbody = $('<tbody></tbody>');
+          if (data.length === 0) {
+            tbody.append(`<tr><td colspan="${columns.length + (opts.actions ? 1 : 0)}" style="color:var(--muted);padding:20px;text-align:center;border:1px dashed var(--border);border-radius:8px">Không có dữ liệu</td></tr>`);
           } else {
-            input = $('<input />').attr('id', 'f_' + f.key).attr('type', f.type || 'text');
+            data.forEach(row => {
+              const tr = $('<tr></tr>').attr('data-id', row.id);
+              // Allow caller to assign custom CSS classes per row (e.g. highlight recent reservations)
+              if (opts.rowClass) {
+                const cls = opts.rowClass(row);
+                if (cls) tr.addClass(cls);
+              }
+              columns.forEach(col => {
+                const val = row[col.key];
+                // Format expiry badge
+                if (col.key === 'status' && opts.badge) {
+                  const cls = row.status;
+                  tr.append(`<td><span class="badge ${cls}">${val}</span></td>`);
+                } else {
+                  tr.append(`<td>${val != null ? val : ''}</td>`);
+                }
+              });
+              if (opts.actions) {
+                const td = $('<td class="actions"></td>');
+                const actionsWrapper = $('<div class="action-wrapper"></div>');
+                if (opts.onEdit) {
+                  actionsWrapper.append(`<button class="btn" data-action="edit">Sửa</button>`);
+                }
+                if (opts.onDelete) {
+                  actionsWrapper.append(`<button class="btn danger" data-action="delete">Xoá</button>`);
+                }
+                // Append payment button or badge if enabled
+                if (opts.payButton) {
+                  if (row.payment_status && row.payment_status === 'paid') {
+                    actionsWrapper.append(`<span class="badge paid">Đã TT</span>`);
+                  } else {
+                    actionsWrapper.append(`<button class="btn primary" data-action="pay">Thanh toán</button>`);
+                  }
+                }
+                td.append(actionsWrapper);
+                tr.append(td);
+              }
+              tbody.append(tr);
+            });
           }
-          field.append(input);
-          $('#drawer-content').append(field);
-        });
-        // fill values if record exists
-        if (record) {
-          fieldsDef.forEach(f => {
-            $('#f_' + f.key).val(record[f.key] != null ? record[f.key] : '');
-          });
-        } else {
-          fieldsDef.forEach(f => {
-            $('#f_' + f.key).val(f.default || '');
-          });
-          // Prefill reservation datetime fields based on currently selected date in Reservations view
-          if (mode === 'reservations') {
-            let selDate = $('#section-reservations .toolbar input[type=date]').val();
-            if (!selDate) {
-              const now = new Date();
-              const y = now.getFullYear();
-              const m = String(now.getMonth() + 1).padStart(2, '0');
-              const day = String(now.getDate()).padStart(2, '0');
-              selDate = `${y}-${m}-${day}`;
-            }
-            // If selected date is today, default to next full hour; else 00:00-01:00
-            const nowLocal = new Date();
-            const y2 = nowLocal.getFullYear();
-            const m2 = String(nowLocal.getMonth() + 1).padStart(2, '0');
-            const d2 = String(nowLocal.getDate()).padStart(2, '0');
-            const todayStr = `${y2}-${m2}-${d2}`;
-            let startHour;
-            if (selDate === todayStr) {
-              startHour = nowLocal.getHours() + 1;
-              if (startHour < 6) startHour = 6;
-              if (startHour > 21) startHour = 21;
-            } else {
-              startHour = 0;
-            }
-            const endHour = startHour + 1;
-            const pad2 = (n) => String(n).padStart(2, '0');
-            $('#f_start_time').val(selDate + 'T' + pad2(startHour) + ':00');
-            $('#f_end_time').val(selDate + 'T' + pad2(endHour) + ':00');
-          }
+          container.empty().append($('<table></table>').append(thead).append(tbody));
         }
-        // toggle delete button
-        if (modules[mode].remove) {
-          $('#delete-record').show();
-        } else {
-          $('#delete-record').hide();
-        }
-        $('#drawer').addClass('open');
-      }
-      function closeDrawer() {
-        $('#drawer').removeClass('open');
-        drawerMode = null;
-        currentId = null;
-        originalRecord = null;
-      }
-      $('#close-drawer').on('click', closeDrawer);
 
-      $('#save-record').on('click', async () => {
-        if (!drawerMode) return;
-        const mod = modules[drawerMode];
-        const data = {};
-        mod.fields.forEach(f => {
-          data[f.key] = $('#f_' + f.key).val();
-        });
-        try {
-          let result;
-          if (currentId) {
-            // diff for patch
-            const patch = {};
-            for (const k in data) {
-              if (!originalRecord || data[k] != originalRecord[k]) patch[k] = data[k];
+        // Drawer handling
+        let drawerMode = null; // e.g. 'players', 'courts'
+        let currentId = null;
+        let originalRecord = null;
+        function openDrawer(title, record, mode) {
+          drawerMode = mode;
+          currentId = record ? record.id : null;
+          originalRecord = record ? { ...record } : null;
+          $('#drawer-title').text(title);
+          $('#drawer-content').empty();
+          // dynamic form fields based on mode
+          const fieldsDef = modules[mode].fields;
+          fieldsDef.forEach(f => {
+            const field = $('<div class="field"></div>');
+            field.append(`<label>${f.label}</label>`);
+            let input;
+            if (f.type === 'select') {
+              input = $('<select></select>').attr('id', 'f_' + f.key);
+              (f.options || []).forEach(opt => {
+                input.append(`<option value="${opt.value}">${opt.text}</option>`);
+              });
+            } else if (f.type === 'textarea') {
+              input = $('<textarea></textarea>').attr('id', 'f_' + f.key).attr('rows', 3);
+            } else {
+              input = $('<input />').attr('id', 'f_' + f.key).attr('type', f.type || 'text');
             }
-            if (Object.keys(patch).length === 0) {
-              showToast('Không có gì thay đổi.', 'error');
+            field.append(input);
+            $('#drawer-content').append(field);
+          });
+          // fill values if record exists
+          if (record) {
+            fieldsDef.forEach(f => {
+              $('#f_' + f.key).val(record[f.key] != null ? record[f.key] : '');
+            });
+          } else {
+            fieldsDef.forEach(f => {
+              $('#f_' + f.key).val(f.default || '');
+            });
+            // Prefill reservation datetime fields based on currently selected date in Reservations view
+            if (mode === 'reservations') {
+              let selDate = $('#section-reservations .toolbar input[type=date]').val();
+              if (!selDate) {
+                const now = new Date();
+                const y = now.getFullYear();
+                const m = String(now.getMonth() + 1).padStart(2, '0');
+                const day = String(now.getDate()).padStart(2, '0');
+                selDate = `${y}-${m}-${day}`;
+              }
+              // If selected date is today, default to next full hour; else 00:00-01:00
+              const nowLocal = new Date();
+              const y2 = nowLocal.getFullYear();
+              const m2 = String(nowLocal.getMonth() + 1).padStart(2, '0');
+              const d2 = String(nowLocal.getDate()).padStart(2, '0');
+              const todayStr = `${y2}-${m2}-${d2}`;
+              let startHour;
+              if (selDate === todayStr) {
+                startHour = nowLocal.getHours() + 1;
+                if (startHour < 6) startHour = 6;
+                if (startHour > 21) startHour = 21;
+              } else {
+                startHour = 0;
+              }
+              const endHour = startHour + 1;
+              const pad2 = (n) => String(n).padStart(2, '0');
+              $('#f_start_time').val(selDate + 'T' + pad2(startHour) + ':00');
+              $('#f_end_time').val(selDate + 'T' + pad2(endHour) + ':00');
+            }
+          }
+          // toggle delete button
+          if (modules[mode].remove) {
+            $('#delete-record').show();
+          } else {
+            $('#delete-record').hide();
+          }
+          $('#drawer').addClass('open');
+        }
+        function closeDrawer() {
+          $('#drawer').removeClass('open');
+          drawerMode = null;
+          currentId = null;
+          originalRecord = null;
+        }
+        $('#close-drawer').on('click', closeDrawer);
+
+        $('#save-record').on('click', async () => {
+          if (!drawerMode) return;
+          const mod = modules[drawerMode];
+          const data = {};
+          mod.fields.forEach(f => {
+            data[f.key] = $('#f_' + f.key).val();
+          });
+          try {
+            let result;
+            if (currentId) {
+              // diff for patch
+              const patch = {};
+              for (const k in data) {
+                if (!originalRecord || data[k] != originalRecord[k]) patch[k] = data[k];
+              }
+              if (Object.keys(patch).length === 0) {
+                showToast('Không có gì thay đổi.', 'error');
+                return;
+              }
+              result = await mod.patch(currentId, patch);
+            } else {
+              result = await mod.create(data);
+            }
+            // Special handling: if editing waitlist and a reservation is created (no priority field)
+            if (drawerMode === 'waitlist' && result && result.priority === undefined) {
+              showToast('Yêu cầu chờ đã được chuyển thành đặt sân.', 'success');
+              // refresh both waitlist and reservations lists
+              await modules.waitlist.load();
+              await modules.reservations.load();
+              closeDrawer();
               return;
             }
-            result = await mod.patch(currentId, patch);
-          } else {
-            result = await mod.create(data);
-          }
-          // Special handling: if editing waitlist and a reservation is created (no priority field)
-          if (drawerMode === 'waitlist' && result && result.priority === undefined) {
-            showToast('Yêu cầu chờ đã được chuyển thành đặt sân.', 'success');
-            // refresh both waitlist and reservations lists
-            await modules.waitlist.load();
-            await modules.reservations.load();
+            await mod.load();
             closeDrawer();
-            return;
+            showToast(currentId ? 'Cập nhật thành công!' : 'Thêm mới thành công!', 'success');
+          } catch (err) {
+            showToast(err.responseJSON ? err.responseJSON.error : err.statusText, 'error');
           }
-          await mod.load();
-          closeDrawer();
-          showToast(currentId ? 'Cập nhật thành công!' : 'Thêm mới thành công!', 'success');
-        } catch (err) {
-          showToast(err.responseJSON ? err.responseJSON.error : err.statusText, 'error');
-        }
-      });
-      $('#delete-record').on('click', async () => {
-        if (!drawerMode || !currentId) return;
-        if (!confirm('Bạn có chắc muốn xoá?')) return;
-        try {
-          await modules[drawerMode].remove(currentId);
-          await modules[drawerMode].load();
-          closeDrawer();
-          showToast('Xoá thành công!', 'success');
-        } catch (err) {
-          showToast(err.responseJSON ? err.responseJSON.error : err.statusText, 'error');
-        }
-      });
+        });
+        $('#delete-record').on('click', async () => {
+          if (!drawerMode || !currentId) return;
+          if (!confirm('Bạn có chắc muốn xoá?')) return;
+          try {
+            await modules[drawerMode].remove(currentId);
+            await modules[drawerMode].load();
+            closeDrawer();
+            showToast('Xoá thành công!', 'success');
+          } catch (err) {
+            showToast(err.responseJSON ? err.responseJSON.error : err.statusText, 'error');
+          }
+        });
 
-      // Modules for each section
-      const modules = {
-        players: {
-          fields: [
-            { key: 'name', label: 'Tên', type: 'text' },
-            { key: 'phone', label: 'Điện thoại', type: 'text' },
-            { key: 'email', label: 'Email', type: 'text' },
-            { key: 'status', label: 'Tình trạng', type: 'select', options: [{ value: 'active', text: 'Còn hạn' }, { value: 'expired', text: 'Hết hạn' }, { value: 'none', text: 'Không' }] },
-            { key: 'expiry', label: 'Ngày hết hạn', type: 'date' }
-          ],
-          load: async function () {
-            const data = await api.players.list();
-            // Remove duplicate entries by unique id
-            const dedup = [];
-            data.forEach(row => {
-              if (!dedup.some(item => item.id === row.id)) dedup.push(row);
-            });
-            this.data = dedup;
-            const container = $('#section-players');
-            // toolbar
-            const toolbar = $('<div class="toolbar"></div>');
-            const qInput = $('<input placeholder="Tìm theo tên/điện thoại/email..."/>');
-            const statusSel = $('<select><option value="">Tất cả</option><option value="active">Còn hạn</option><option value="expired">Hết hạn</option><option value="none">Không</option></select>');
-            const refreshBtn = $('<button class="btn">Tải lại</button>').on('click', () => this.load());
-            const addBtn = $('<button class="btn primary">Thêm</button>').on('click', () => {
-              openDrawer('Thêm hội viên', null, 'players');
-            });
-            toolbar.append(qInput, statusSel, refreshBtn, addBtn);
-            // table container
-            const tableContainer = $('<div></div>');
-            // helper to render the table based on current filter values
-            const renderList = () => {
-              const q = qInput.val() || '';
-              const st = statusSel.val();
-              const filtered = this.data.filter(row => {
-                const hits = row.name.toLowerCase().includes(q.toLowerCase()) ||
-                  (row.phone || '').toLowerCase().includes(q.toLowerCase()) ||
-                  (row.email || '').toLowerCase().includes(q.toLowerCase());
-                const statusMatch = st ? (row.status === st) : true;
-                return hits && statusMatch;
+        // Modules for each section
+        const modules = {
+          players: {
+            fields: [
+              { key: 'name', label: 'Tên', type: 'text' },
+              { key: 'phone', label: 'Điện thoại', type: 'text' },
+              { key: 'email', label: 'Email', type: 'text' },
+              { key: 'status', label: 'Tình trạng', type: 'select', options: [{ value: 'active', text: 'Còn hạn' }, { value: 'expired', text: 'Hết hạn' }, { value: 'none', text: 'Không' }] },
+              { key: 'expiry', label: 'Ngày hết hạn', type: 'date' }
+            ],
+            load: async function () {
+              const data = await api.players.list();
+              // Remove duplicate entries by unique id
+              const dedup = [];
+              data.forEach(row => {
+                if (!dedup.some(item => item.id === row.id)) dedup.push(row);
               });
-              // Render the filtered table
+              this.data = dedup;
+              const container = $('#section-players');
+              // toolbar
+              const toolbar = $('<div class="toolbar"></div>');
+              const qInput = $('<input placeholder="Tìm theo tên/điện thoại/email..."/>');
+              const statusSel = $('<select><option value="">Tất cả</option><option value="active">Còn hạn</option><option value="expired">Hết hạn</option><option value="none">Không</option></select>');
+              const refreshBtn = $('<button class="btn">Tải lại</button>').on('click', () => this.load());
+              const addBtn = $('<button class="btn primary">Thêm</button>').on('click', () => {
+                openDrawer('Thêm hội viên', null, 'players');
+              });
+              toolbar.append(qInput, statusSel, refreshBtn, addBtn);
+              // table container
+              const tableContainer = $('<div></div>');
+              // helper to render the table based on current filter values
+              const renderList = () => {
+                const q = qInput.val() || '';
+                const st = statusSel.val();
+                const filtered = this.data.filter(row => {
+                  const hits = row.name.toLowerCase().includes(q.toLowerCase()) ||
+                    (row.phone || '').toLowerCase().includes(q.toLowerCase()) ||
+                    (row.email || '').toLowerCase().includes(q.toLowerCase());
+                  const statusMatch = st ? (row.status === st) : true;
+                  return hits && statusMatch;
+                });
+                // Render the filtered table
+                renderTable(tableContainer,
+                  [
+                    { key: 'name', label: 'Tên' },
+                    { key: 'phone', label: 'Liên hệ' },
+                    { key: 'status', label: 'Hội viên' },
+                    { key: 'expiry', label: 'Hết hạn' }
+                  ],
+                  filtered,
+                  {
+                    actions: true,
+                    badge: true,
+                    onEdit: true,
+                    onDelete: true
+                  }
+                );
+              };
+              // initial render
+              renderList();
+              // bind actions after each render via event delegation
+              tableContainer.off('click').on('click', 'button[data-action]', (e) => {
+                const id = parseInt($(e.target).closest('tr').data('id'), 10);
+                const row = this.data.find(r => r.id === id);
+                const action = $(e.target).data('action');
+                if (action === 'edit') {
+                  openDrawer('Sửa hội viên', row, 'players');
+                } else if (action === 'delete') {
+                  if (confirm('Bạn có chắc muốn xoá hội viên này?')) {
+                    api.players.remove(id).then(() => this.load());
+                  }
+                }
+              });
+              container.empty().append($('<div class="card"></div>').append(toolbar, tableContainer));
+              // filter events: do not reload data, just re-render list
+              qInput.on('input', renderList);
+              statusSel.on('change', renderList);
+            },
+            create: (d) => api.players.create(d),
+            patch: (id, d) => api.players.patch(id, d),
+            remove: (id) => api.players.remove(id)
+          },
+          courts: {
+            fields: [
+              { key: 'name', label: 'Tên sân', type: 'text' },
+              { key: 'location', label: 'Vị trí', type: 'text' },
+              { key: 'surface', label: 'Mặt sân', type: 'text' },
+              { key: 'indoor', label: 'Trong nhà', type: 'select', options: [{ value: '0', text: 'Không' }, { value: '1', text: 'Có' }] },
+              { key: 'lights', label: 'Đèn', type: 'select', options: [{ value: '0', text: 'Không' }, { value: '1', text: 'Có' }] },
+              { key: 'is_active', label: 'Hoạt động', type: 'select', options: [{ value: '1', text: 'Có' }, { value: '0', text: 'Không' }] }
+            ],
+            load: async function () {
+              const data = await api.courts.list();
+              // Remove duplicates by id
+              const dedup = [];
+              data.forEach(row => {
+                if (!dedup.some(item => item.id === row.id)) dedup.push(row);
+              });
+              this.data = dedup;
+              const container = $('#section-courts');
+              const toolbar = $('<div class="toolbar"></div>');
+              const qInput = $('<input placeholder="Tìm theo tên/vị trí..."/>');
+              const refreshBtn = $('<button class="btn">Tải lại</button>').on('click', () => this.load());
+              const addBtn = $('<button class="btn primary">Thêm</button>').on('click', () => {
+                openDrawer('Thêm sân', null, 'courts');
+              });
+              toolbar.append(qInput, refreshBtn, addBtn);
+              const list = this.data.filter(row => {
+                const q = qInput.val() || '';
+                const hits = row.name.toLowerCase().includes(q.toLowerCase()) || (row.location || '').toLowerCase().includes(q.toLowerCase());
+                return hits;
+              });
+              const tableContainer = $('<div></div>');
               renderTable(tableContainer,
                 [
                   { key: 'name', label: 'Tên' },
-                  { key: 'phone', label: 'Liên hệ' },
-                  { key: 'status', label: 'Hội viên' },
-                  { key: 'expiry', label: 'Hết hạn' }
-                ],
-                filtered,
-                {
-                  actions: true,
-                  badge: true,
-                  onEdit: true,
-                  onDelete: true
-                }
-              );
-            };
-            // initial render
-            renderList();
-            // bind actions after each render via event delegation
-            tableContainer.off('click').on('click', 'button[data-action]', (e) => {
-              const id = parseInt($(e.target).closest('tr').data('id'), 10);
-              const row = this.data.find(r => r.id === id);
-              const action = $(e.target).data('action');
-              if (action === 'edit') {
-                openDrawer('Sửa hội viên', row, 'players');
-              } else if (action === 'delete') {
-                if (confirm('Bạn có chắc muốn xoá hội viên này?')) {
-                  api.players.remove(id).then(() => this.load());
-                }
-              }
-            });
-            container.empty().append($('<div class="card"></div>').append(toolbar, tableContainer));
-            // filter events: do not reload data, just re-render list
-            qInput.on('input', renderList);
-            statusSel.on('change', renderList);
-          },
-          create: (d) => api.players.create(d),
-          patch: (id, d) => api.players.patch(id, d),
-          remove: (id) => api.players.remove(id)
-        },
-        courts: {
-          fields: [
-            { key: 'name', label: 'Tên sân', type: 'text' },
-            { key: 'location', label: 'Vị trí', type: 'text' },
-            { key: 'surface', label: 'Mặt sân', type: 'text' },
-            { key: 'indoor', label: 'Trong nhà', type: 'select', options: [{ value: '0', text: 'Không' }, { value: '1', text: 'Có' }] },
-            { key: 'lights', label: 'Đèn', type: 'select', options: [{ value: '0', text: 'Không' }, { value: '1', text: 'Có' }] },
-            { key: 'is_active', label: 'Hoạt động', type: 'select', options: [{ value: '1', text: 'Có' }, { value: '0', text: 'Không' }] }
-          ],
-          load: async function () {
-            const data = await api.courts.list();
-            // Remove duplicates by id
-            const dedup = [];
-            data.forEach(row => {
-              if (!dedup.some(item => item.id === row.id)) dedup.push(row);
-            });
-            this.data = dedup;
-            const container = $('#section-courts');
-            const toolbar = $('<div class="toolbar"></div>');
-            const qInput = $('<input placeholder="Tìm theo tên/vị trí..."/>');
-            const refreshBtn = $('<button class="btn">Tải lại</button>').on('click', () => this.load());
-            const addBtn = $('<button class="btn primary">Thêm</button>').on('click', () => {
-              openDrawer('Thêm sân', null, 'courts');
-            });
-            toolbar.append(qInput, refreshBtn, addBtn);
-            const list = this.data.filter(row => {
-              const q = qInput.val() || '';
-              const hits = row.name.toLowerCase().includes(q.toLowerCase()) || (row.location || '').toLowerCase().includes(q.toLowerCase());
-              return hits;
-            });
-            const tableContainer = $('<div></div>');
-            renderTable(tableContainer,
-              [
-                { key: 'name', label: 'Tên' },
-                { key: 'location', label: 'Vị trí' },
-                { key: 'surface', label: 'Mặt sân' },
-                { key: 'indoor', label: 'Trong nhà' },
-                { key: 'lights', label: 'Đèn' },
-                { key: 'is_active', label: 'Hoạt động' }
-              ],
-              list,
-              {
-                actions: true,
-                onEdit: true,
-                onDelete: true
-              }
-            );
-            tableContainer.on('click', 'button[data-action]', (e) => {
-              const id = parseInt($(e.target).closest('tr').data('id'), 10);
-              const row = this.data.find(r => r.id === id);
-              const action = $(e.target).data('action');
-              if (action === 'edit') {
-                openDrawer('Sửa sân', row, 'courts');
-              } else if (action === 'delete') {
-                if (confirm('Xoá sân này?')) {
-                  api.courts.remove(id).then(() => this.load());
-                }
-              }
-            });
-            container.empty().append($('<div class="card"></div>').append(toolbar, tableContainer));
-            qInput.on('input', () => this.load());
-          },
-          create: (d) => api.courts.create({
-            name: d.name,
-            location: d.location,
-            surface: d.surface,
-            indoor: parseInt(d.indoor || '0', 10),
-            lights: parseInt(d.lights || '0', 10),
-            is_active: parseInt(d.is_active || '1', 10)
-          }),
-          patch: (id, d) => api.courts.patch(id, d),
-          remove: (id) => api.courts.remove(id)
-        },
-        reservations: {
-          fields: [
-            { key: 'court_id', label: 'Sân', type: 'select', options: [] },
-            { key: 'player_id', label: 'Người đặt', type: 'select', options: [] },
-            { key: 'start_time', label: 'Bắt đầu', type: 'datetime-local' },
-            { key: 'end_time', label: 'Kết thúc', type: 'datetime-local' },
-            { key: 'status', label: 'Trạng thái', type: 'select', options: [{ value: 'booked', text: 'Đang đặt' }, { value: 'completed', text: 'Hoàn thành' }, { value: 'cancelled', text: 'Hủy' }] },
-            { key: 'price_cents', label: 'Phí (VND)', type: 'number' },
-            { key: 'payment_status', label: 'Thanh toán', type: 'select', options: [{ value: 'unpaid', text: 'Chưa thanh toán' }, { value: 'paid', text: 'Đã thanh toán' }] }
-          ],
-          load: async function () {
-            // fetch reservations and remove duplicates by id
-            const data = await api.reservations.list();
-            const dedup = [];
-            data.forEach(row => {
-              if (!dedup.some(item => item.id === row.id)) dedup.push(row);
-            });
-            // keep all reservations even if there are multiple for the same slot; do not deduplicate by time
-            this.data = dedup;
-            // fetch all events once for grid overlay
-            const eventsData = await api.events.list();
-            // preload courts list for grid rendering and filters
-            const courts = await api.courts.list();
-            const container = $('#section-reservations');
-            const toolbar = $('<div class="toolbar"></div>');
-            // search and filters
-            const qInput = $('<input placeholder="Tìm theo tên/sân..."/>');
-            const courtSel = $('<select></select>');
-            courtSel.append('<option value="">Tất cả sân</option>');
-            courts.forEach(c => {
-              courtSel.append(`<option value="${c.id}">${c.name}</option>`);
-            });
-            const prevBtn = $('<button class="btn" title="Ngày trước">←</button>');
-            const dateInput = $('<input type="date"/>');
-            const nextBtn = $('<button class="btn" title="Ngày kế tiếp">→</button>');
-            const refreshBtn = $('<button class="btn">Tải lại</button>').on('click', () => this.load());
-            const addBtn = $('<button class="btn primary">Thêm</button>').on('click', async () => {
-              const courtsOpt = await api.courts.list();
-              const players = await api.players.list();
-              this.fields.find(f => f.key === 'court_id').options = courtsOpt.map(c => ({ value: c.id, text: c.name }));
-              this.fields.find(f => f.key === 'player_id').options = players.map(p => ({ value: p.id, text: p.name }));
-              openDrawer('Thêm đặt sân', null, 'reservations');
-            });
-            // assemble toolbar: search, court filter, prev/date/next, refresh and add
-            toolbar.append(qInput, courtSel, prevBtn, dateInput, nextBtn, refreshBtn, addBtn);
-            const tableContainer = $('<div></div>');
-            const gridContainer = $('<div></div>').css('margin-top', '16px');
-            // helper to render list and grid based on filters
-            // format a Date as local YYYY-MM-DD (for <input type="date">)
-            const formatLocalDate = (d) => {
-              const y = d.getFullYear();
-              const m = String(d.getMonth() + 1).padStart(2, '0');
-              const day = String(d.getDate()).padStart(2, '0');
-              return `${y}-${m}-${day}`;
-            };
-
-            const renderListAndGrid = () => {
-              const q = (qInput.val() || '').toLowerCase();
-              const selectedCourt = courtSel.val();
-              const d = dateInput.val();
-              // filter list
-              const list = this.data.filter(row => {
-                // search by player name or court name
-                const matchesQ = !q || (row.player_name && row.player_name.toLowerCase().includes(q)) || (row.court_name && row.court_name.toLowerCase().includes(q));
-                // filter by court
-                const matchesCourt = selectedCourt ? (row.court_id === parseInt(selectedCourt, 10)) : true;
-                // filter by date if selected
-                const matchesDate = d ? row.start_time.slice(0, 10) === d : true;
-                return matchesQ && matchesCourt && matchesDate;
-              });
-              // compute payment label and nearest upcoming reservation id
-              const now = new Date();
-              let nearestDiff = Infinity;
-              let nearestId = null;
-              list.forEach(r => {
-                // label
-                r.payment_label = `<span class="badge ${r.payment_status === 'paid' ? 'paid' : 'unpaid'}">${r.payment_status === 'paid' ? 'Đã thanh toán' : 'Chưa thanh toán'}</span>`;
-                // compute upcoming difference
-                try {
-                  const st = new Date(r.start_time.replace(' ', 'T'));
-                  const diff = st - now;
-                  if (diff >= 0 && diff < nearestDiff) {
-                    nearestDiff = diff;
-                    nearestId = r.id;
-                  }
-                } catch (e) { }
-              });
-              // Render table with payment info
-              renderTable(tableContainer,
-                [
-                  { key: 'court_name', label: 'Sân' },
-                  { key: 'player_name', label: 'Người đặt' },
-                  { key: 'start_time', label: 'Bắt đầu' },
-                  { key: 'end_time', label: 'Kết thúc' },
-                  { key: 'status', label: 'Trạng thái' },
-                  { key: 'payment_label', label: 'Thanh toán' }
+                  { key: 'location', label: 'Vị trí' },
+                  { key: 'surface', label: 'Mặt sân' },
+                  { key: 'indoor', label: 'Trong nhà' },
+                  { key: 'lights', label: 'Đèn' },
+                  { key: 'is_active', label: 'Hoạt động' }
                 ],
                 list,
                 {
                   actions: true,
                   onEdit: true,
-                  onDelete: true,
-                  payButton: true
+                  onDelete: true
                 }
               );
-              // Render grid only when a date is selected
-              gridContainer.empty();
-              if (d && courts && courts.length > 0) {
-                const hours = [];
-                for (let h = 6; h < 22; h++) hours.push(h);
-                const table = $('<table class="schedule-table"></table>');
-                const header = $('<tr></tr>');
-                header.append('<th class="time-cell">Thời gian</th>');
-                courts.forEach(c => {
-                  header.append(`<th>${c.name}</th>`);
-                });
-                table.append(header);
-                hours.forEach(h => {
-                  const rowTr = $('<tr></tr>');
-                  const startLabel = (h < 10 ? '0' : '') + h + ':00';
-                  const endLabel = (h + 1 < 10 ? '0' : '') + (h + 1) + ':00';
-                  rowTr.append(`<td class="time-cell">${startLabel} - ${endLabel}</td>`);
-                  courts.forEach(c => {
-                    const cell = $('<td></td>');
-                    // check reservations overlapping this hour for this court
-                    list.forEach(r => {
-                      if (r.court_id === c.id) {
-                        const sH = parseInt(r.start_time.substr(11, 2), 10);
-                        const sM = parseInt(r.start_time.substr(14, 2), 10);
-                        const eH = parseInt(r.end_time.substr(11, 2), 10);
-                        const eM = parseInt(r.end_time.substr(14, 2), 10);
-                        const startMin = sH * 60 + sM;
-                        const endMin = eH * 60 + eM;
-                        const cellStart = h * 60;
-                        const cellEnd = (h + 1) * 60;
-                        if (startMin < cellEnd && endMin > cellStart) {
-                          cell.addClass('reserved');
-                          cell.attr('title', r.player_name + ' ' + r.start_time.substr(11, 5) + '-' + r.end_time.substr(11, 5));
-                        }
-                      }
-                    });
-                    // check events overlapping this hour for this court or all courts
-                    const eventsOnDate = eventsData.filter(ev => {
-                      if (!ev.start_time || !ev.end_time) return false;
-                      const startDate = ev.start_time.slice(0, 10);
-                      const endDate = ev.end_time.slice(0, 10);
-                      return (startDate <= d && endDate >= d);
-                    });
-                    eventsOnDate.forEach(ev => {
-                      if (ev.court_id === c.id || ev.court_id == null) {
-                        const eSH = parseInt(ev.start_time.substr(11, 2), 10);
-                        const eSM = parseInt(ev.start_time.substr(14, 2), 10);
-                        const eEH = parseInt(ev.end_time.substr(11, 2), 10);
-                        const eEM = parseInt(ev.end_time.substr(14, 2), 10);
-                        const evStartMin = eSH * 60 + eSM;
-                        const evEndMin = eEH * 60 + eEM;
-                        const cellStart = h * 60;
-                        const cellEnd = (h + 1) * 60;
-                        if (evStartMin < cellEnd && evEndMin > cellStart) {
-                          cell.removeClass('reserved');
-                          cell.addClass('event');
-                          cell.attr('title', (ev.name || 'Sự kiện') + ' ' + ev.start_time.substr(11, 5) + '-' + ev.end_time.substr(11, 5));
-                        }
-                      }
-                    });
-                    rowTr.append(cell);
-                  });
-                  table.append(rowTr);
-                });
-                gridContainer.append($('<div class="card"></div>').append('<h3>Lịch theo giờ</h3>', table));
-              }
-            };
-            // set default date to today
-            (function setDefaultDate() {
-              const now = new Date();
-              const y = now.getFullYear();
-              const m = String(now.getMonth() + 1).padStart(2, '0');
-              const d = String(now.getDate()).padStart(2, '0');
-              dateInput.val(`${y}-${m}-${d}`);
-            }).call(this);
-            // initial render
-            renderListAndGrid();
-            // handle actions on table rows
-            tableContainer.off('click').on('click', 'button[data-action]', async (e) => {
-              const id = parseInt($(e.target).closest('tr').data('id'), 10);
-              const row = this.data.find(r => r.id === id);
-              const action = $(e.target).data('action');
-              if (action === 'edit') {
+              tableContainer.on('click', 'button[data-action]', (e) => {
+                const id = parseInt($(e.target).closest('tr').data('id'), 10);
+                const row = this.data.find(r => r.id === id);
+                const action = $(e.target).data('action');
+                if (action === 'edit') {
+                  openDrawer('Sửa sân', row, 'courts');
+                } else if (action === 'delete') {
+                  if (confirm('Xoá sân này?')) {
+                    api.courts.remove(id).then(() => this.load());
+                  }
+                }
+              });
+              container.empty().append($('<div class="card"></div>').append(toolbar, tableContainer));
+              qInput.on('input', () => this.load());
+            },
+            create: (d) => api.courts.create({
+              name: d.name,
+              location: d.location,
+              surface: d.surface,
+              indoor: parseInt(d.indoor || '0', 10),
+              lights: parseInt(d.lights || '0', 10),
+              is_active: parseInt(d.is_active || '1', 10)
+            }),
+            patch: (id, d) => api.courts.patch(id, d),
+            remove: (id) => api.courts.remove(id)
+          },
+          reservations: {
+            fields: [
+              { key: 'court_id', label: 'Sân', type: 'select', options: [] },
+              { key: 'player_id', label: 'Người đặt', type: 'select', options: [] },
+              { key: 'start_time', label: 'Bắt đầu', type: 'datetime-local' },
+              { key: 'end_time', label: 'Kết thúc', type: 'datetime-local' },
+              { key: 'status', label: 'Trạng thái', type: 'select', options: [{ value: 'booked', text: 'Đang đặt' }, { value: 'completed', text: 'Hoàn thành' }, { value: 'cancelled', text: 'Hủy' }] },
+              { key: 'price_cents', label: 'Phí (VND)', type: 'number' },
+              { key: 'payment_status', label: 'Thanh toán', type: 'select', options: [{ value: 'unpaid', text: 'Chưa thanh toán' }, { value: 'paid', text: 'Đã thanh toán' }] }
+            ],
+            load: async function () {
+              // fetch reservations and remove duplicates by id
+              const data = await api.reservations.list();
+              const dedup = [];
+              data.forEach(row => {
+                if (!dedup.some(item => item.id === row.id)) dedup.push(row);
+              });
+              // keep all reservations even if there are multiple for the same slot; do not deduplicate by time
+              this.data = dedup;
+              // fetch all events once for grid overlay
+              const eventsData = await api.events.list();
+              // preload courts list for grid rendering and filters
+              const courts = await api.courts.list();
+              const container = $('#section-reservations');
+              const toolbar = $('<div class="toolbar"></div>');
+              // search and filters
+              const qInput = $('<input placeholder="Tìm theo tên/sân..."/>');
+              const courtSel = $('<select></select>');
+              courtSel.append('<option value="">Tất cả sân</option>');
+              courts.forEach(c => {
+                courtSel.append(`<option value="${c.id}">${c.name}</option>`);
+              });
+              const prevBtn = $('<button class="btn" title="Ngày trước">←</button>');
+              const dateInput = $('<input type="date"/>');
+              const nextBtn = $('<button class="btn" title="Ngày kế tiếp">→</button>');
+              const refreshBtn = $('<button class="btn">Tải lại</button>').on('click', () => this.load());
+              const addBtn = $('<button class="btn primary">Thêm</button>').on('click', async () => {
                 const courtsOpt = await api.courts.list();
                 const players = await api.players.list();
                 this.fields.find(f => f.key === 'court_id').options = courtsOpt.map(c => ({ value: c.id, text: c.name }));
                 this.fields.find(f => f.key === 'player_id').options = players.map(p => ({ value: p.id, text: p.name }));
-                const rcopy = { ...row };
-                rcopy.start_time = row.start_time.replace(' ', 'T');
-                rcopy.end_time = row.end_time.replace(' ', 'T');
-                openDrawer('Sửa đặt sân', rcopy, 'reservations');
-              } else if (action === 'delete') {
-                if (confirm('Xoá đặt sân này?')) {
-                  api.reservations.remove(id).then(() => this.load());
+                openDrawer('Thêm đặt sân', null, 'reservations');
+              });
+              // assemble toolbar: search, court filter, prev/date/next, refresh and add
+              toolbar.append(qInput, courtSel, prevBtn, dateInput, nextBtn, refreshBtn, addBtn);
+              const tableContainer = $('<div></div>');
+              const gridContainer = $('<div></div>').css('margin-top', '16px');
+              // helper to render list and grid based on filters
+              // format a Date as local YYYY-MM-DD (for <input type="date">)
+              const formatLocalDate = (d) => {
+                const y = d.getFullYear();
+                const m = String(d.getMonth() + 1).padStart(2, '0');
+                const day = String(d.getDate()).padStart(2, '0');
+                return `${y}-${m}-${day}`;
+              };
+
+              const renderListAndGrid = () => {
+                const q = (qInput.val() || '').toLowerCase();
+                const selectedCourt = courtSel.val();
+                const d = dateInput.val();
+                // filter list
+                const list = this.data.filter(row => {
+                  // search by player name or court name
+                  const matchesQ = !q || (row.player_name && row.player_name.toLowerCase().includes(q)) || (row.court_name && row.court_name.toLowerCase().includes(q));
+                  // filter by court
+                  const matchesCourt = selectedCourt ? (row.court_id === parseInt(selectedCourt, 10)) : true;
+                  // filter by date if selected
+                  const matchesDate = d ? row.start_time.slice(0, 10) === d : true;
+                  return matchesQ && matchesCourt && matchesDate;
+                });
+                // compute payment label and nearest upcoming reservation id
+                const now = new Date();
+                let nearestDiff = Infinity;
+                let nearestId = null;
+                list.forEach(r => {
+                  // label
+                  r.payment_label = `<span class="badge ${r.payment_status === 'paid' ? 'paid' : 'unpaid'}">${r.payment_status === 'paid' ? 'Đã TT' : 'Chưa TT'}</span>`;
+                  // compute upcoming difference
+                  try {
+                    const st = new Date(r.start_time.replace(' ', 'T'));
+                    const diff = st - now;
+                    if (diff >= 0 && diff < nearestDiff) {
+                      nearestDiff = diff;
+                      nearestId = r.id;
+                    }
+                  } catch (e) { }
+                });
+                // Render table with payment info
+                renderTable(tableContainer,
+                  [
+                    { key: 'court_name', label: 'Sân' },
+                    { key: 'player_name', label: 'Người đặt' },
+                    { key: 'start_time', label: 'Bắt đầu' },
+                    { key: 'end_time', label: 'Kết thúc' },
+                    { key: 'status', label: 'Trạng thái' },
+                    { key: 'payment_label', label: 'Thanh toán' }
+                  ],
+                  list,
+                  {
+                    actions: true,
+                    onEdit: true,
+                    onDelete: true,
+                    payButton: true
+                  }
+                );
+                // Render grid only when a date is selected
+                gridContainer.empty();
+                if (d && courts && courts.length > 0) {
+                  const hours = [];
+                  for (let h = 6; h < 22; h++) hours.push(h);
+                  const table = $('<table class="schedule-table"></table>');
+                  const header = $('<tr></tr>');
+                  header.append('<th class="time-cell">Thời gian</th>');
+                  courts.forEach(c => {
+                    header.append(`<th>${c.name}</th>`);
+                  });
+                  table.append(header);
+                  hours.forEach(h => {
+                    const rowTr = $('<tr></tr>');
+                    const startLabel = (h < 10 ? '0' : '') + h + ':00';
+                    const endLabel = (h + 1 < 10 ? '0' : '') + (h + 1) + ':00';
+                    rowTr.append(`<td class="time-cell">${startLabel} - ${endLabel}</td>`);
+                    courts.forEach(c => {
+                      const cell = $('<td></td>');
+                      // check reservations overlapping this hour for this court
+                      list.forEach(r => {
+                        if (r.court_id === c.id) {
+                          const sH = parseInt(r.start_time.substr(11, 2), 10);
+                          const sM = parseInt(r.start_time.substr(14, 2), 10);
+                          const eH = parseInt(r.end_time.substr(11, 2), 10);
+                          const eM = parseInt(r.end_time.substr(14, 2), 10);
+                          const startMin = sH * 60 + sM;
+                          const endMin = eH * 60 + eM;
+                          const cellStart = h * 60;
+                          const cellEnd = (h + 1) * 60;
+                          if (startMin < cellEnd && endMin > cellStart) {
+                            cell.addClass('reserved');
+                            cell.attr('title', r.player_name + ' ' + r.start_time.substr(11, 5) + '-' + r.end_time.substr(11, 5));
+                          }
+                        }
+                      });
+                      // check events overlapping this hour for this court or all courts
+                      const eventsOnDate = eventsData.filter(ev => {
+                        if (!ev.start_time || !ev.end_time) return false;
+                        const startDate = ev.start_time.slice(0, 10);
+                        const endDate = ev.end_time.slice(0, 10);
+                        return (startDate <= d && endDate >= d);
+                      });
+                      eventsOnDate.forEach(ev => {
+                        if (ev.court_id === c.id || ev.court_id == null) {
+                          const eSH = parseInt(ev.start_time.substr(11, 2), 10);
+                          const eSM = parseInt(ev.start_time.substr(14, 2), 10);
+                          const eEH = parseInt(ev.end_time.substr(11, 2), 10);
+                          const eEM = parseInt(ev.end_time.substr(14, 2), 10);
+                          const evStartMin = eSH * 60 + eSM;
+                          const evEndMin = eEH * 60 + eEM;
+                          const cellStart = h * 60;
+                          const cellEnd = (h + 1) * 60;
+                          if (evStartMin < cellEnd && evEndMin > cellStart) {
+                            cell.removeClass('reserved');
+                            cell.addClass('event');
+                            cell.attr('title', (ev.name || 'Sự kiện') + ' ' + ev.start_time.substr(11, 5) + '-' + ev.end_time.substr(11, 5));
+                          }
+                        }
+                      });
+                      rowTr.append(cell);
+                    });
+                    table.append(rowTr);
+                  });
+                  gridContainer.append($('<div class="card"></div>').append('<h3>Lịch theo giờ</h3>', table));
                 }
-              } else if (action === 'pay') {
-                // Set pending payment and switch to payments tab
-                window.pendingPaymentReservation = row;
-                $('nav button[data-section="payments"]').click();
-              }
-            });
-            // append content
-            container.empty().append($('<div class="card"></div>').append(toolbar, tableContainer, gridContainer));
-            // filter change events
-            qInput.on('input', renderListAndGrid);
-            courtSel.on('change', renderListAndGrid);
-            dateInput.on('change', renderListAndGrid);
-            // next/prev buttons adjust date
-            prevBtn.on('click', async () => {
-              let current = dateInput.val();
-              let dt;
-              if (current) dt = new Date(current + 'T00:00:00'); else dt = new Date();
-              dt.setDate(dt.getDate() - 1);
-              // Use local date string to avoid UTC shift issues
-              dateInput.val(formatLocalDate(dt)).trigger('change');
-            });
-            nextBtn.on('click', async () => {
-              let current = dateInput.val();
-              let dt;
-              if (current) dt = new Date(current + 'T00:00:00'); else dt = new Date();
-              dt.setDate(dt.getDate() + 1);
-              // Use local date string to avoid UTC shift issues
-              dateInput.val(formatLocalDate(dt)).trigger('change');
-            });
-            // show schedule in right panel
-            $('#schedule-view').show();
-            loadSchedule();
+              };
+              // set default date to today
+              (function setDefaultDate() {
+                const now = new Date();
+                const y = now.getFullYear();
+                const m = String(now.getMonth() + 1).padStart(2, '0');
+                const d = String(now.getDate()).padStart(2, '0');
+                dateInput.val(`${y}-${m}-${d}`);
+              }).call(this);
+              // initial render
+              renderListAndGrid();
+              // handle actions on table rows
+              tableContainer.off('click').on('click', 'button[data-action]', async (e) => {
+                const id = parseInt($(e.target).closest('tr').data('id'), 10);
+                const row = this.data.find(r => r.id === id);
+                const action = $(e.target).data('action');
+                if (action === 'edit') {
+                  const courtsOpt = await api.courts.list();
+                  const players = await api.players.list();
+                  this.fields.find(f => f.key === 'court_id').options = courtsOpt.map(c => ({ value: c.id, text: c.name }));
+                  this.fields.find(f => f.key === 'player_id').options = players.map(p => ({ value: p.id, text: p.name }));
+                  const rcopy = { ...row };
+                  rcopy.start_time = row.start_time.replace(' ', 'T');
+                  rcopy.end_time = row.end_time.replace(' ', 'T');
+                  openDrawer('Sửa đặt sân', rcopy, 'reservations');
+                } else if (action === 'delete') {
+                  if (confirm('Xoá đặt sân này?')) {
+                    api.reservations.remove(id).then(() => this.load());
+                  }
+                } else if (action === 'pay') {
+                  // Set pending payment and switch to payments tab
+                  window.pendingPaymentReservation = row;
+                  $('nav button[data-section="payments"]').click();
+                }
+              });
+              // append content
+              container.empty().append($('<div class="card"></div>').append(toolbar, tableContainer, gridContainer));
+              // filter change events
+              qInput.on('input', renderListAndGrid);
+              courtSel.on('change', renderListAndGrid);
+              dateInput.on('change', renderListAndGrid);
+              // next/prev buttons adjust date
+              prevBtn.on('click', async () => {
+                let current = dateInput.val();
+                let dt;
+                if (current) dt = new Date(current + 'T00:00:00'); else dt = new Date();
+                dt.setDate(dt.getDate() - 1);
+                // Use local date string to avoid UTC shift issues
+                dateInput.val(formatLocalDate(dt)).trigger('change');
+              });
+              nextBtn.on('click', async () => {
+                let current = dateInput.val();
+                let dt;
+                if (current) dt = new Date(current + 'T00:00:00'); else dt = new Date();
+                dt.setDate(dt.getDate() + 1);
+                // Use local date string to avoid UTC shift issues
+                dateInput.val(formatLocalDate(dt)).trigger('change');
+              });
+              // show schedule in right panel
+              $('#schedule-view').show();
+              loadSchedule();
+            },
+            create: (d) => api.reservations.create({
+              court_id: parseInt(d.court_id, 10),
+              player_id: parseInt(d.player_id, 10),
+              start_time: d.start_time.replace('T', ' '),
+              end_time: d.end_time.replace('T', ' '),
+              status: d.status,
+              price_cents: parseInt(d.price_cents || '0', 10)
+            }),
+            patch: (id, d) => {
+              if (d.start_time) d.start_time = d.start_time.replace('T', ' ');
+              if (d.end_time) d.end_time = d.end_time.replace('T', ' ');
+              return api.reservations.patch(id, d);
+            },
+            remove: (id) => api.reservations.remove(id)
           },
-          create: (d) => api.reservations.create({
-            court_id: parseInt(d.court_id, 10),
-            player_id: parseInt(d.player_id, 10),
-            start_time: d.start_time.replace('T', ' '),
-            end_time: d.end_time.replace('T', ' '),
-            status: d.status,
-            price_cents: parseInt(d.price_cents || '0', 10)
-          }),
-          patch: (id, d) => {
-            if (d.start_time) d.start_time = d.start_time.replace('T', ' ');
-            if (d.end_time) d.end_time = d.end_time.replace('T', ' ');
-            return api.reservations.patch(id, d);
-          },
-          remove: (id) => api.reservations.remove(id)
-        },
-        waitlist: {
-          fields: [
-            { key: 'court_id', label: 'Sân', type: 'select', options: [] },
-            { key: 'player_id', label: 'Người đăng ký', type: 'select', options: [] },
-            { key: 'start_time', label: 'Bắt đầu', type: 'datetime-local' },
-            { key: 'end_time', label: 'Kết thúc', type: 'datetime-local' },
-            { key: 'priority', label: 'Ưu tiên', type: 'number' },
-            { key: 'status', label: 'Trạng thái', type: 'select', options: [{ value: 'waiting', text: 'Đợi' }, { value: 'notified', text: 'Đã thông báo' }, { value: 'booked', text: 'Đã đặt' }, { value: 'cancelled', text: 'Hủy' }, { value: 'expired', text: 'Hết hạn' }] }
-          ],
-          load: async function () {
-            const data = await api.waitlist.list();
-            // Remove duplicates by id
-            const dedup = [];
-            data.forEach(row => {
-              if (!dedup.some(item => item.id === row.id)) dedup.push(row);
-            });
-            this.data = dedup;
-            const container = $('#section-waitlist');
-            const toolbar = $('<div class="toolbar"></div>');
-            const refreshBtn = $('<button class="btn">Tải lại</button>').on('click', () => this.load());
-            const addBtn = $('<button class="btn primary">Thêm</button>').on('click', async () => {
-              const courts = await api.courts.list();
-              const players = await api.players.list();
-              this.fields.find(f => f.key === 'court_id').options = courts.map(c => ({ value: c.id, text: c.name }));
-              this.fields.find(f => f.key === 'player_id').options = players.map(p => ({ value: p.id, text: p.name }));
-              openDrawer('Thêm hàng chờ', null, 'waitlist');
-            });
-            toolbar.append(refreshBtn, addBtn);
-            const tableContainer = $('<div></div>');
-            renderTable(tableContainer,
-              [
-                { key: 'court_name', label: 'Sân' },
-                { key: 'player_name', label: 'Người đợi' },
-                { key: 'start_time', label: 'Bắt đầu' },
-                { key: 'end_time', label: 'Kết thúc' },
-                { key: 'priority', label: 'Ưu tiên' },
-                { key: 'status', label: 'Trạng thái' }
-              ],
-              data,
-              { actions: true, onEdit: true, onDelete: true }
-            );
-            tableContainer.on('click', 'button[data-action]', async (e) => {
-              const id = parseInt($(e.target).closest('tr').data('id'), 10);
-              const row = this.data.find(r => r.id === id);
-              const action = $(e.target).data('action');
-              if (action === 'edit') {
+          waitlist: {
+            fields: [
+              { key: 'court_id', label: 'Sân', type: 'select', options: [] },
+              { key: 'player_id', label: 'Người đăng ký', type: 'select', options: [] },
+              { key: 'start_time', label: 'Bắt đầu', type: 'datetime-local' },
+              { key: 'end_time', label: 'Kết thúc', type: 'datetime-local' },
+              { key: 'priority', label: 'Ưu tiên', type: 'number' },
+              { key: 'status', label: 'Trạng thái', type: 'select', options: [{ value: 'waiting', text: 'Đợi' }, { value: 'notified', text: 'Đã thông báo' }, { value: 'booked', text: 'Đã đặt' }, { value: 'cancelled', text: 'Hủy' }, { value: 'expired', text: 'Hết hạn' }] }
+            ],
+            load: async function () {
+              const data = await api.waitlist.list();
+              // Remove duplicates by id
+              const dedup = [];
+              data.forEach(row => {
+                if (!dedup.some(item => item.id === row.id)) dedup.push(row);
+              });
+              this.data = dedup;
+              const container = $('#section-waitlist');
+              const toolbar = $('<div class="toolbar"></div>');
+              const refreshBtn = $('<button class="btn">Tải lại</button>').on('click', () => this.load());
+              const addBtn = $('<button class="btn primary">Thêm</button>').on('click', async () => {
                 const courts = await api.courts.list();
                 const players = await api.players.list();
                 this.fields.find(f => f.key === 'court_id').options = courts.map(c => ({ value: c.id, text: c.name }));
                 this.fields.find(f => f.key === 'player_id').options = players.map(p => ({ value: p.id, text: p.name }));
-                const rcopy = { ...row };
-                rcopy.start_time = row.start_time.replace(' ', 'T');
-                rcopy.end_time = row.end_time.replace(' ', 'T');
-                openDrawer('Sửa hàng chờ', rcopy, 'waitlist');
-              } else if (action === 'delete') {
-                if (confirm('Xoá?')) {
-                  api.waitlist.remove(id).then(() => this.load());
+                openDrawer('Thêm hàng chờ', null, 'waitlist');
+              });
+              toolbar.append(refreshBtn, addBtn);
+              const tableContainer = $('<div></div>');
+              renderTable(tableContainer,
+                [
+                  { key: 'court_name', label: 'Sân' },
+                  { key: 'player_name', label: 'Người đợi' },
+                  { key: 'start_time', label: 'Bắt đầu' },
+                  { key: 'end_time', label: 'Kết thúc' },
+                  { key: 'priority', label: 'Ưu tiên' },
+                  { key: 'status', label: 'Trạng thái' }
+                ],
+                data,
+                { actions: true, onEdit: true, onDelete: true }
+              );
+              tableContainer.on('click', 'button[data-action]', async (e) => {
+                const id = parseInt($(e.target).closest('tr').data('id'), 10);
+                const row = this.data.find(r => r.id === id);
+                const action = $(e.target).data('action');
+                if (action === 'edit') {
+                  const courts = await api.courts.list();
+                  const players = await api.players.list();
+                  this.fields.find(f => f.key === 'court_id').options = courts.map(c => ({ value: c.id, text: c.name }));
+                  this.fields.find(f => f.key === 'player_id').options = players.map(p => ({ value: p.id, text: p.name }));
+                  const rcopy = { ...row };
+                  rcopy.start_time = row.start_time.replace(' ', 'T');
+                  rcopy.end_time = row.end_time.replace(' ', 'T');
+                  openDrawer('Sửa hàng chờ', rcopy, 'waitlist');
+                } else if (action === 'delete') {
+                  if (confirm('Xoá?')) {
+                    api.waitlist.remove(id).then(() => this.load());
+                  }
                 }
-              }
-            });
-            container.empty().append($('<div class="card"></div>').append(toolbar, tableContainer));
+              });
+              container.empty().append($('<div class="card"></div>').append(toolbar, tableContainer));
+            },
+            create: (d) => api.waitlist.create({
+              court_id: parseInt(d.court_id, 10),
+              player_id: parseInt(d.player_id, 10),
+              start_time: d.start_time.replace('T', ' '),
+              end_time: d.end_time.replace('T', ' '),
+              priority: parseInt(d.priority || '0', 10),
+              status: d.status
+            }),
+            patch: (id, d) => {
+              if (d.start_time) d.start_time = d.start_time.replace('T', ' ');
+              if (d.end_time) d.end_time = d.end_time.replace('T', ' ');
+              return api.waitlist.patch(id, d);
+            },
+            remove: (id) => api.waitlist.remove(id)
           },
-          create: (d) => api.waitlist.create({
-            court_id: parseInt(d.court_id, 10),
-            player_id: parseInt(d.player_id, 10),
-            start_time: d.start_time.replace('T', ' '),
-            end_time: d.end_time.replace('T', ' '),
-            priority: parseInt(d.priority || '0', 10),
-            status: d.status
-          }),
-          patch: (id, d) => {
-            if (d.start_time) d.start_time = d.start_time.replace('T', ' ');
-            if (d.end_time) d.end_time = d.end_time.replace('T', ' ');
-            return api.waitlist.patch(id, d);
-          },
-          remove: (id) => api.waitlist.remove(id)
-        },
-        events: {
-          fields: [
-            { key: 'name', label: 'Tên sự kiện', type: 'text' },
-            { key: 'description', label: 'Mô tả', type: 'textarea' },
-            { key: 'court_id', label: 'Sân', type: 'select', options: [] },
-            { key: 'start_time', label: 'Bắt đầu', type: 'datetime-local' },
-            { key: 'end_time', label: 'Kết thúc', type: 'datetime-local' },
-            { key: 'max_participants', label: 'Số người tối đa', type: 'number' },
-            { key: 'fee_cents', label: 'Phí (VND)', type: 'number' },
-            { key: 'status', label: 'Trạng thái', type: 'select', options: [{ value: 'draft', text: 'Nháp' }, { value: 'open', text: 'Mở đăng ký' }, { value: 'full', text: 'Đầy' }, { value: 'closed', text: 'Đóng' }, { value: 'cancelled', text: 'Hủy' }] }
-          ],
-          load: async function () {
-            const data = await api.events.list();
-            // Remove duplicates by id
-            const dedup = [];
-            data.forEach(row => {
-              if (!dedup.some(item => item.id === row.id)) dedup.push(row);
-            });
-            this.data = dedup;
-            const container = $('#section-events');
-            const toolbar = $('<div class="toolbar"></div>');
-            const refreshBtn = $('<button class="btn">Tải lại</button>').on('click', () => this.load());
-            const addBtn = $('<button class="btn primary">Thêm</button>').on('click', async () => {
-              const courts = await api.courts.list();
-              this.fields.find(f => f.key === 'court_id').options = [{ value: '', text: '(Không)' }].concat(courts.map(c => ({ value: c.id, text: c.name })));
-              openDrawer('Thêm sự kiện', null, 'events');
-            });
-            toolbar.append(refreshBtn, addBtn);
-            const tableContainer = $('<div></div>');
-            renderTable(tableContainer,
-              [
-                { key: 'name', label: 'Tên' },
-                { key: 'court_name', label: 'Sân' },
-                { key: 'start_time', label: 'Bắt đầu' },
-                { key: 'end_time', label: 'Kết thúc' },
-                { key: 'max_participants', label: 'Tối đa' },
-                { key: 'fee_cents', label: 'Phí' },
-                { key: 'status', label: 'Trạng thái' }
-              ],
-              data,
-              { actions: true, onEdit: true, onDelete: true }
-            );
-            tableContainer.on('click', 'button[data-action]', async (e) => {
-              const id = parseInt($(e.target).closest('tr').data('id'), 10);
-              const row = this.data.find(r => r.id === id);
-              const action = $(e.target).data('action');
-              if (action === 'edit') {
+          events: {
+            fields: [
+              { key: 'name', label: 'Tên sự kiện', type: 'text' },
+              { key: 'description', label: 'Mô tả', type: 'textarea' },
+              { key: 'court_id', label: 'Sân', type: 'select', options: [] },
+              { key: 'start_time', label: 'Bắt đầu', type: 'datetime-local' },
+              { key: 'end_time', label: 'Kết thúc', type: 'datetime-local' },
+              { key: 'max_participants', label: 'Số người tối đa', type: 'number' },
+              { key: 'fee_cents', label: 'Phí (VND)', type: 'number' },
+              { key: 'status', label: 'Trạng thái', type: 'select', options: [{ value: 'draft', text: 'Nháp' }, { value: 'open', text: 'Mở đăng ký' }, { value: 'full', text: 'Đầy' }, { value: 'closed', text: 'Đóng' }, { value: 'cancelled', text: 'Hủy' }] }
+            ],
+            load: async function () {
+              const data = await api.events.list();
+              // Remove duplicates by id
+              const dedup = [];
+              data.forEach(row => {
+                if (!dedup.some(item => item.id === row.id)) dedup.push(row);
+              });
+              this.data = dedup;
+              const container = $('#section-events');
+              const toolbar = $('<div class="toolbar"></div>');
+              const refreshBtn = $('<button class="btn">Tải lại</button>').on('click', () => this.load());
+              const addBtn = $('<button class="btn primary">Thêm</button>').on('click', async () => {
                 const courts = await api.courts.list();
                 this.fields.find(f => f.key === 'court_id').options = [{ value: '', text: '(Không)' }].concat(courts.map(c => ({ value: c.id, text: c.name })));
-                const rcopy = { ...row };
-                rcopy.start_time = row.start_time.replace(' ', 'T');
-                rcopy.end_time = row.end_time.replace(' ', 'T');
-                openDrawer('Sửa sự kiện', rcopy, 'events');
-              } else if (action === 'delete') {
-                if (confirm('Xoá sự kiện?')) {
-                  api.events.remove(id).then(() => this.load());
+                openDrawer('Thêm sự kiện', null, 'events');
+              });
+              toolbar.append(refreshBtn, addBtn);
+              const tableContainer = $('<div></div>');
+              renderTable(tableContainer,
+                [
+                  { key: 'name', label: 'Tên' },
+                  { key: 'court_name', label: 'Sân' },
+                  { key: 'start_time', label: 'Bắt đầu' },
+                  { key: 'end_time', label: 'Kết thúc' },
+                  { key: 'max_participants', label: 'Tối đa' },
+                  { key: 'fee_cents', label: 'Phí' },
+                  { key: 'status', label: 'Trạng thái' }
+                ],
+                data,
+                { actions: true, onEdit: true, onDelete: true }
+              );
+              tableContainer.on('click', 'button[data-action]', async (e) => {
+                const id = parseInt($(e.target).closest('tr').data('id'), 10);
+                const row = this.data.find(r => r.id === id);
+                const action = $(e.target).data('action');
+                if (action === 'edit') {
+                  const courts = await api.courts.list();
+                  this.fields.find(f => f.key === 'court_id').options = [{ value: '', text: '(Không)' }].concat(courts.map(c => ({ value: c.id, text: c.name })));
+                  const rcopy = { ...row };
+                  rcopy.start_time = row.start_time.replace(' ', 'T');
+                  rcopy.end_time = row.end_time.replace(' ', 'T');
+                  openDrawer('Sửa sự kiện', rcopy, 'events');
+                } else if (action === 'delete') {
+                  if (confirm('Xoá sự kiện?')) {
+                    api.events.remove(id).then(() => this.load());
+                  }
                 }
-              }
-            });
-            container.empty().append($('<div class="card"></div>').append(toolbar, tableContainer));
+              });
+              container.empty().append($('<div class="card"></div>').append(toolbar, tableContainer));
+            },
+            create: (d) => api.events.create({
+              name: d.name,
+              description: d.description,
+              court_id: d.court_id ? parseInt(d.court_id, 10) : null,
+              start_time: d.start_time.replace('T', ' '),
+              end_time: d.end_time.replace('T', ' '),
+              max_participants: d.max_participants ? parseInt(d.max_participants, 10) : null,
+              fee_cents: parseInt(d.fee_cents || '0', 10),
+              status: d.status
+            }),
+            patch: (id, d) => {
+              if (d.start_time) d.start_time = d.start_time.replace('T', ' ');
+              if (d.end_time) d.end_time = d.end_time.replace('T', ' ');
+              if (d.court_id === '') d.court_id = null;
+              return api.events.patch(id, d);
+            },
+            remove: (id) => api.events.remove(id)
           },
-          create: (d) => api.events.create({
-            name: d.name,
-            description: d.description,
-            court_id: d.court_id ? parseInt(d.court_id, 10) : null,
-            start_time: d.start_time.replace('T', ' '),
-            end_time: d.end_time.replace('T', ' '),
-            max_participants: d.max_participants ? parseInt(d.max_participants, 10) : null,
-            fee_cents: parseInt(d.fee_cents || '0', 10),
-            status: d.status
-          }),
-          patch: (id, d) => {
-            if (d.start_time) d.start_time = d.start_time.replace('T', ' ');
-            if (d.end_time) d.end_time = d.end_time.replace('T', ' ');
-            if (d.court_id === '') d.court_id = null;
-            return api.events.patch(id, d);
-          },
-          remove: (id) => api.events.remove(id)
-        },
-        memberships: {
-          fields: [
-            { key: 'player_id', label: 'Hội viên', type: 'select', options: [] },
-            { key: 'plan_id', label: 'Gói', type: 'select', options: [] },
-            { key: 'start_date', label: 'Ngày bắt đầu', type: 'date' },
-            { key: 'end_date', label: 'Ngày kết thúc', type: 'date' },
-            { key: 'status', label: 'Trạng thái', type: 'select', options: [{ value: 'active', text: 'Còn hạn' }, { value: 'expired', text: 'Hết hạn' }, { value: 'pending', text: 'Chờ' }, { value: 'cancelled', text: 'Hủy' }] }
-          ],
-          load: async function () {
-            const data = await api.memberships.list();
-            // Remove duplicates by id
-            const dedup = [];
-            data.forEach(row => {
-              if (!dedup.some(item => item.id === row.id)) dedup.push(row);
-            });
-            this.data = dedup;
-            const container = $('#section-memberships');
-            const toolbar = $('<div class="toolbar"></div>');
-            const refreshBtn = $('<button class="btn">Tải lại</button>').on('click', () => this.load());
-            const addBtn = $('<button class="btn primary">Thêm</button>').on('click', async () => {
-              const players = await api.players.list();
-              const plans = await api.membershipPlans.list();
-              this.fields.find(f => f.key === 'player_id').options = players.map(p => ({ value: p.id, text: p.name }));
-              this.fields.find(f => f.key === 'plan_id').options = plans.map(p => ({ value: p.id, text: p.name }));
-              openDrawer('Thêm thẻ hội viên', null, 'memberships');
-            });
-            toolbar.append(refreshBtn, addBtn);
-            const tableContainer = $('<div></div>');
-            renderTable(tableContainer,
-              [
-                { key: 'player_name', label: 'Hội viên' },
-                { key: 'plan_name', label: 'Gói' },
-                { key: 'start_date', label: 'Bắt đầu' },
-                { key: 'end_date', label: 'Kết thúc' },
-                { key: 'status', label: 'Trạng thái' }
-              ],
-              data,
-              { actions: true, onEdit: true, onDelete: true }
-            );
-            tableContainer.on('click', 'button[data-action]', async (e) => {
-              const id = parseInt($(e.target).closest('tr').data('id'), 10);
-              const row = this.data.find(r => r.id === id);
-              const action = $(e.target).data('action');
-              if (action === 'edit') {
+          memberships: {
+            fields: [
+              { key: 'player_id', label: 'Hội viên', type: 'select', options: [] },
+              { key: 'plan_id', label: 'Gói', type: 'select', options: [] },
+              { key: 'start_date', label: 'Ngày bắt đầu', type: 'date' },
+              { key: 'end_date', label: 'Ngày kết thúc', type: 'date' },
+              { key: 'status', label: 'Trạng thái', type: 'select', options: [{ value: 'active', text: 'Còn hạn' }, { value: 'expired', text: 'Hết hạn' }, { value: 'pending', text: 'Chờ' }, { value: 'cancelled', text: 'Hủy' }] }
+            ],
+            load: async function () {
+              const data = await api.memberships.list();
+              // Remove duplicates by id
+              const dedup = [];
+              data.forEach(row => {
+                if (!dedup.some(item => item.id === row.id)) dedup.push(row);
+              });
+              this.data = dedup;
+              const container = $('#section-memberships');
+              const toolbar = $('<div class="toolbar"></div>');
+              const refreshBtn = $('<button class="btn">Tải lại</button>').on('click', () => this.load());
+              const addBtn = $('<button class="btn primary">Thêm</button>').on('click', async () => {
                 const players = await api.players.list();
                 const plans = await api.membershipPlans.list();
                 this.fields.find(f => f.key === 'player_id').options = players.map(p => ({ value: p.id, text: p.name }));
                 this.fields.find(f => f.key === 'plan_id').options = plans.map(p => ({ value: p.id, text: p.name }));
-                const rcopy = { ...row };
-                rcopy.start_date = row.start_date;
-                rcopy.end_date = row.end_date;
-                openDrawer('Sửa thẻ hội viên', rcopy, 'memberships');
-              } else if (action === 'delete') {
-                if (confirm('Xoá thẻ hội viên?')) {
-                  api.memberships.remove(id).then(() => this.load());
+                openDrawer('Thêm thẻ hội viên', null, 'memberships');
+              });
+              toolbar.append(refreshBtn, addBtn);
+              const tableContainer = $('<div></div>');
+              renderTable(tableContainer,
+                [
+                  { key: 'player_name', label: 'Hội viên' },
+                  { key: 'plan_name', label: 'Gói' },
+                  { key: 'start_date', label: 'Bắt đầu' },
+                  { key: 'end_date', label: 'Kết thúc' },
+                  { key: 'status', label: 'Trạng thái' }
+                ],
+                data,
+                { actions: true, onEdit: true, onDelete: true }
+              );
+              tableContainer.on('click', 'button[data-action]', async (e) => {
+                const id = parseInt($(e.target).closest('tr').data('id'), 10);
+                const row = this.data.find(r => r.id === id);
+                const action = $(e.target).data('action');
+                if (action === 'edit') {
+                  const players = await api.players.list();
+                  const plans = await api.membershipPlans.list();
+                  this.fields.find(f => f.key === 'player_id').options = players.map(p => ({ value: p.id, text: p.name }));
+                  this.fields.find(f => f.key === 'plan_id').options = plans.map(p => ({ value: p.id, text: p.name }));
+                  const rcopy = { ...row };
+                  rcopy.start_date = row.start_date;
+                  rcopy.end_date = row.end_date;
+                  openDrawer('Sửa thẻ hội viên', rcopy, 'memberships');
+                } else if (action === 'delete') {
+                  if (confirm('Xoá thẻ hội viên?')) {
+                    api.memberships.remove(id).then(() => this.load());
+                  }
                 }
-              }
-            });
-            container.empty().append($('<div class="card"></div>').append(toolbar, tableContainer));
+              });
+              container.empty().append($('<div class="card"></div>').append(toolbar, tableContainer));
+            },
+            create: (d) => api.memberships.create({
+              player_id: parseInt(d.player_id, 10),
+              plan_id: parseInt(d.plan_id, 10),
+              start_date: d.start_date,
+              end_date: d.end_date,
+              status: d.status
+            }),
+            patch: (id, d) => api.memberships.patch(id, d),
+            remove: (id) => api.memberships.remove(id)
           },
-          create: (d) => api.memberships.create({
-            player_id: parseInt(d.player_id, 10),
-            plan_id: parseInt(d.plan_id, 10),
-            start_date: d.start_date,
-            end_date: d.end_date,
-            status: d.status
-          }),
-          patch: (id, d) => api.memberships.patch(id, d),
-          remove: (id) => api.memberships.remove(id)
-        },
-        payments: {
-          fields: [
-            { key: 'player_id', label: 'Hội viên', type: 'select', options: [] },
-            { key: 'amount_cents', label: 'Số tiền', type: 'number' },
-            { key: 'currency', label: 'Tiền tệ', type: 'text', default: 'VND' },
-            { key: 'source_type', label: 'Loại nguồn', type: 'text' },
-            { key: 'source_id', label: 'ID nguồn', type: 'number' },
-            { key: 'method', label: 'Phương thức', type: 'text' },
-            { key: 'status', label: 'Trạng thái', type: 'select', options: [{ value: 'pending', text: 'Đang xử lý' }, { value: 'succeeded', text: 'Thành công' }, { value: 'failed', text: 'Thất bại' }, { value: 'refunded', text: 'Đã hoàn tiền' }, { value: 'partial', text: 'Hoàn 1 phần' }] }
-          ],
-          load: async function () {
-            const data = await api.payments.list();
-            // Remove duplicates by id
-            const dedup = [];
-            data.forEach(row => {
-              if (!dedup.some(item => item.id === row.id)) dedup.push(row);
-            });
-            this.data = dedup;
-            const container = $('#section-payments');
-            const toolbar = $('<div class="toolbar"></div>');
-            const refreshBtn = $('<button class="btn">Tải lại</button>').on('click', () => this.load());
-            const addBtn = $('<button class="btn primary">Thêm</button>').on('click', async () => {
-              const players = await api.players.list();
-              this.fields.find(f => f.key === 'player_id').options = players.map(p => ({ value: p.id, text: p.name }));
-              openDrawer('Thêm thanh toán', null, 'payments');
-            });
-            toolbar.append(refreshBtn, addBtn);
-            const tableContainer = $('<div></div>');
-            renderTable(tableContainer,
-              [
-                { key: 'player_name', label: 'Hội viên' },
-                { key: 'amount_cents', label: 'Số tiền' },
-                { key: 'currency', label: 'Tiền tệ' },
-                { key: 'source_type', label: 'Nguồn' },
-                { key: 'source_id', label: 'ID nguồn' },
-                { key: 'method', label: 'Phương thức' },
-                { key: 'status', label: 'Trạng thái' },
-                { key: 'created_at', label: 'Ngày tạo' }
-              ],
-              data,
-              { actions: true, onEdit: true, onDelete: true }
-            );
-            tableContainer.on('click', 'button[data-action]', async (e) => {
-              const id = parseInt($(e.target).closest('tr').data('id'), 10);
-              const row = this.data.find(r => r.id === id);
-              const action = $(e.target).data('action');
-              if (action === 'edit') {
+          payments: {
+            fields: [
+              { key: 'player_id', label: 'Hội viên', type: 'select', options: [] },
+              { key: 'amount_cents', label: 'Số tiền', type: 'number' },
+              { key: 'currency', label: 'Tiền tệ', type: 'text', default: 'VND' },
+              { key: 'source_type', label: 'Loại nguồn', type: 'text' },
+              { key: 'source_id', label: 'ID nguồn', type: 'number' },
+              { key: 'method', label: 'Phương thức', type: 'text' },
+              { key: 'status', label: 'Trạng thái', type: 'select', options: [{ value: 'pending', text: 'Đang xử lý' }, { value: 'succeeded', text: 'Thành công' }, { value: 'failed', text: 'Thất bại' }, { value: 'refunded', text: 'Đã hoàn tiền' }, { value: 'partial', text: 'Hoàn 1 phần' }] }
+            ],
+            load: async function () {
+              const data = await api.payments.list();
+              // Remove duplicates by id
+              const dedup = [];
+              data.forEach(row => {
+                if (!dedup.some(item => item.id === row.id)) dedup.push(row);
+              });
+              this.data = dedup;
+              const container = $('#section-payments');
+              const toolbar = $('<div class="toolbar"></div>');
+              const refreshBtn = $('<button class="btn">Tải lại</button>').on('click', () => this.load());
+              const addBtn = $('<button class="btn primary">Thêm</button>').on('click', async () => {
                 const players = await api.players.list();
                 this.fields.find(f => f.key === 'player_id').options = players.map(p => ({ value: p.id, text: p.name }));
-                openDrawer('Sửa thanh toán', row, 'payments');
-              } else if (action === 'delete') {
-                if (confirm('Xoá thanh toán?')) {
-                  api.payments.remove(id).then(() => this.load());
+                openDrawer('Thêm thanh toán', null, 'payments');
+              });
+              toolbar.append(refreshBtn, addBtn);
+              const tableContainer = $('<div></div>');
+              renderTable(tableContainer,
+                [
+                  { key: 'player_name', label: 'Hội viên' },
+                  { key: 'amount_cents', label: 'Số tiền' },
+                  { key: 'currency', label: 'Tiền tệ' },
+                  { key: 'source_type', label: 'Nguồn' },
+                  { key: 'source_id', label: 'ID nguồn' },
+                  { key: 'method', label: 'Phương thức' },
+                  { key: 'status', label: 'Trạng thái' },
+                  { key: 'created_at', label: 'Ngày tạo' }
+                ],
+                data,
+                { actions: true, onEdit: true, onDelete: true }
+              );
+              tableContainer.on('click', 'button[data-action]', async (e) => {
+                const id = parseInt($(e.target).closest('tr').data('id'), 10);
+                const row = this.data.find(r => r.id === id);
+                const action = $(e.target).data('action');
+                if (action === 'edit') {
+                  const players = await api.players.list();
+                  this.fields.find(f => f.key === 'player_id').options = players.map(p => ({ value: p.id, text: p.name }));
+                  openDrawer('Sửa thanh toán', row, 'payments');
+                } else if (action === 'delete') {
+                  if (confirm('Xoá thanh toán?')) {
+                    api.payments.remove(id).then(() => this.load());
+                  }
                 }
-              }
-            });
-            container.empty().append($('<div class="card"></div>').append(toolbar, tableContainer));
+              });
+              container.empty().append($('<div class="card"></div>').append(toolbar, tableContainer));
+            },
+            create: (d) => api.payments.create({
+              player_id: parseInt(d.player_id, 10),
+              amount_cents: parseInt(d.amount_cents || '0', 10),
+              currency: d.currency,
+              source_type: d.source_type,
+              source_id: d.source_id ? parseInt(d.source_id, 10) : null,
+              method: d.method,
+              status: d.status
+            }),
+            patch: (id, d) => api.payments.patch(id, d),
+            remove: (id) => api.payments.remove(id)
           },
-          create: (d) => api.payments.create({
-            player_id: parseInt(d.player_id, 10),
-            amount_cents: parseInt(d.amount_cents || '0', 10),
-            currency: d.currency,
-            source_type: d.source_type,
-            source_id: d.source_id ? parseInt(d.source_id, 10) : null,
-            method: d.method,
-            status: d.status
-          }),
-          patch: (id, d) => api.payments.patch(id, d),
-          remove: (id) => api.payments.remove(id)
-        },
-        notifications: {
-          fields: [
-            { key: 'player_id', label: 'Hội viên', type: 'select', options: [] },
-            { key: 'channel', label: 'Kênh', type: 'select', options: [{ value: 'email', text: 'Email' }, { value: 'sms', text: 'SMS' }, { value: 'push', text: 'Push' }] },
-            { key: 'subject', label: 'Tiêu đề', type: 'text' },
-            { key: 'body', label: 'Nội dung', type: 'textarea' },
-            { key: 'scheduled_at', label: 'Thời gian gửi', type: 'datetime-local' },
-            { key: 'status', label: 'Trạng thái', type: 'select', options: [{ value: 'queued', text: 'Hàng đợi' }, { value: 'sent', text: 'Đã gửi' }, { value: 'failed', text: 'Thất bại' }, { value: 'cancelled', text: 'Hủy' }] }
-          ],
-          load: async function () {
-            const data = await api.notifications.list();
-            // Remove duplicates by id
-            const dedup = [];
-            data.forEach(row => {
-              if (!dedup.some(item => item.id === row.id)) dedup.push(row);
-            });
-            this.data = dedup;
-            const container = $('#section-notifications');
-            const toolbar = $('<div class="toolbar"></div>');
-            const refreshBtn = $('<button class="btn">Tải lại</button>').on('click', () => this.load());
-            const addBtn = $('<button class="btn primary">Thêm</button>').on('click', async () => {
-              const players = await api.players.list();
-              this.fields.find(f => f.key === 'player_id').options = [{ value: '', text: '(Không)' }].concat(players.map(p => ({ value: p.id, text: p.name })));
-              openDrawer('Thêm nhắc nhở', null, 'notifications');
-            });
-            toolbar.append(refreshBtn, addBtn);
-            const tableContainer = $('<div></div>');
-            renderTable(tableContainer,
-              [
-                { key: 'player_name', label: 'Hội viên' },
-                { key: 'channel', label: 'Kênh' },
-                { key: 'subject', label: 'Tiêu đề' },
-                { key: 'scheduled_at', label: 'Lịch gửi' },
-                { key: 'status', label: 'Trạng thái' }
-              ],
-              data,
-              { actions: true, onEdit: true, onDelete: true }
-            );
-            tableContainer.on('click', 'button[data-action]', async (e) => {
-              const id = parseInt($(e.target).closest('tr').data('id'), 10);
-              const row = this.data.find(r => r.id === id);
-              const action = $(e.target).data('action');
-              if (action === 'edit') {
+          notifications: {
+            fields: [
+              { key: 'player_id', label: 'Hội viên', type: 'select', options: [] },
+              { key: 'channel', label: 'Kênh', type: 'select', options: [{ value: 'email', text: 'Email' }, { value: 'sms', text: 'SMS' }, { value: 'push', text: 'Push' }] },
+              { key: 'subject', label: 'Tiêu đề', type: 'text' },
+              { key: 'body', label: 'Nội dung', type: 'textarea' },
+              { key: 'scheduled_at', label: 'Thời gian gửi', type: 'datetime-local' },
+              { key: 'status', label: 'Trạng thái', type: 'select', options: [{ value: 'queued', text: 'Hàng đợi' }, { value: 'sent', text: 'Đã gửi' }, { value: 'failed', text: 'Thất bại' }, { value: 'cancelled', text: 'Hủy' }] }
+            ],
+            load: async function () {
+              const data = await api.notifications.list();
+              // Remove duplicates by id
+              const dedup = [];
+              data.forEach(row => {
+                if (!dedup.some(item => item.id === row.id)) dedup.push(row);
+              });
+              this.data = dedup;
+              const container = $('#section-notifications');
+              const toolbar = $('<div class="toolbar"></div>');
+              const refreshBtn = $('<button class="btn">Tải lại</button>').on('click', () => this.load());
+              const addBtn = $('<button class="btn primary">Thêm</button>').on('click', async () => {
                 const players = await api.players.list();
                 this.fields.find(f => f.key === 'player_id').options = [{ value: '', text: '(Không)' }].concat(players.map(p => ({ value: p.id, text: p.name })));
-                const rcopy = { ...row };
-                if (rcopy.player_id == null) rcopy.player_id = '';
-                rcopy.scheduled_at = row.scheduled_at ? row.scheduled_at.replace(' ', 'T') : '';
-                openDrawer('Sửa nhắc nhở', rcopy, 'notifications');
-              } else if (action === 'delete') {
-                if (confirm('Xoá nhắc nhở?')) {
-                  api.notifications.remove(id).then(() => this.load());
-                }
-              }
-            });
-            container.empty().append($('<div class="card"></div>').append(toolbar, tableContainer));
-          },
-          create: (d) => api.notifications.create({
-            player_id: d.player_id ? parseInt(d.player_id, 10) : null,
-            channel: d.channel,
-            subject: d.subject,
-            body: d.body,
-            scheduled_at: d.scheduled_at.replace('T', ' '),
-            status: d.status
-          }),
-          patch: (id, d) => {
-            if (d.player_id === '') d.player_id = null;
-            if (d.scheduled_at) d.scheduled_at = d.scheduled_at.replace('T', ' ');
-            return api.notifications.patch(id, d);
-          },
-          remove: (id) => api.notifications.remove(id)
-        },
-        messages: {
-          fields: [
-            { key: 'player_id', label: 'Hội viên', type: 'select', options: [] },
-            { key: 'channel', label: 'Kênh', type: 'select', options: [{ value: 'email', text: 'Email' }, { value: 'sms', text: 'SMS' }, { value: 'push', text: 'Push' }] },
-            { key: 'subject', label: 'Tiêu đề', type: 'text' },
-            { key: 'body', label: 'Nội dung', type: 'textarea' },
-            { key: 'tags', label: 'Tags (phân tách dấu phẩy)', type: 'text' },
-            { key: 'status', label: 'Trạng thái', type: 'select', options: [{ value: 'sent', text: 'Đã gửi' }, { value: 'failed', text: 'Thất bại' }] }
-          ],
-          load: async function () {
-            const data = await api.messages.list();
-            // Remove duplicates by id
-            const dedup = [];
-            data.forEach(row => {
-              if (!dedup.some(item => item.id === row.id)) dedup.push(row);
-            });
-            this.data = dedup;
-            const container = $('#section-messages');
-            const toolbar = $('<div class="toolbar"></div>');
-            const refreshBtn = $('<button class="btn">Tải lại</button>').on('click', () => this.load());
-            const addBtn = $('<button class="btn primary">Thêm</button>').on('click', async () => {
-              const players = await api.players.list();
-              this.fields.find(f => f.key === 'player_id').options = [{ value: '', text: '(Không)' }].concat(players.map(p => ({ value: p.id, text: p.name })));
-              openDrawer('Gửi tin nhắn', null, 'messages');
-            });
-            toolbar.append(refreshBtn, addBtn);
-            const tableContainer = $('<div></div>');
-            renderTable(tableContainer,
-              [
-                { key: 'player_name', label: 'Hội viên' },
-                { key: 'channel', label: 'Kênh' },
-                { key: 'subject', label: 'Tiêu đề' },
-                { key: 'sent_at', label: 'Thời gian' },
-                { key: 'status', label: 'Trạng thái' }
-              ],
-              data,
-              { actions: false }
-            );
-            container.empty().append($('<div class="card"></div>').append(toolbar, tableContainer));
-          },
-          create: (d) => api.messages.create({
-            player_id: d.player_id ? parseInt(d.player_id, 10) : null,
-            channel: d.channel,
-            subject: d.subject,
-            body: d.body,
-            tags: d.tags ? d.tags.split(',').map(x => x.trim()) : null,
-            status: d.status
-          }),
-          patch: null,
-          remove: null
-        },
-        payments: {
-          data: [],
-          load: async function () {
-            const container = $('#section-payments');
-            container.empty();
-
-            // Check if there's a pending payment for a reservation
-            if (window.pendingPaymentReservation) {
-              // Show payment form
-              this.renderPaymentForm(container);
-            } else {
-              // Show payment history
-              await this.renderPaymentHistory(container);
-            }
-          },
-          renderPaymentForm: async function (container) {
-            const reservation = window.pendingPaymentReservation;
-            const self = this; // Store reference to module
-
-            // Check if this reservation already has a payment
-            let existingPayment = null;
-            try {
-              const allPayments = await api.payments.list();
-              existingPayment = allPayments.find(p =>
-                p.source_type === 'reservation' && p.source_id === reservation.id
+                openDrawer('Thêm nhắc nhở', null, 'notifications');
+              });
+              toolbar.append(refreshBtn, addBtn);
+              const tableContainer = $('<div></div>');
+              renderTable(tableContainer,
+                [
+                  { key: 'player_name', label: 'Hội viên' },
+                  { key: 'channel', label: 'Kênh' },
+                  { key: 'subject', label: 'Tiêu đề' },
+                  { key: 'scheduled_at', label: 'Lịch gửi' },
+                  { key: 'status', label: 'Trạng thái' }
+                ],
+                data,
+                { actions: true, onEdit: true, onDelete: true }
               );
-            } catch (err) {
-              console.error('Error checking existing payment:', err);
-            }
+              tableContainer.on('click', 'button[data-action]', async (e) => {
+                const id = parseInt($(e.target).closest('tr').data('id'), 10);
+                const row = this.data.find(r => r.id === id);
+                const action = $(e.target).data('action');
+                if (action === 'edit') {
+                  const players = await api.players.list();
+                  this.fields.find(f => f.key === 'player_id').options = [{ value: '', text: '(Không)' }].concat(players.map(p => ({ value: p.id, text: p.name })));
+                  const rcopy = { ...row };
+                  if (rcopy.player_id == null) rcopy.player_id = '';
+                  rcopy.scheduled_at = row.scheduled_at ? row.scheduled_at.replace(' ', 'T') : '';
+                  openDrawer('Sửa nhắc nhở', rcopy, 'notifications');
+                } else if (action === 'delete') {
+                  if (confirm('Xoá nhắc nhở?')) {
+                    api.notifications.remove(id).then(() => this.load());
+                  }
+                }
+              });
+              container.empty().append($('<div class="card"></div>').append(toolbar, tableContainer));
+            },
+            create: (d) => api.notifications.create({
+              player_id: d.player_id ? parseInt(d.player_id, 10) : null,
+              channel: d.channel,
+              subject: d.subject,
+              body: d.body,
+              scheduled_at: d.scheduled_at.replace('T', ' '),
+              status: d.status
+            }),
+            patch: (id, d) => {
+              if (d.player_id === '') d.player_id = null;
+              if (d.scheduled_at) d.scheduled_at = d.scheduled_at.replace('T', ' ');
+              return api.notifications.patch(id, d);
+            },
+            remove: (id) => api.notifications.remove(id)
+          },
+          messages: {
+            fields: [
+              { key: 'player_id', label: 'Hội viên', type: 'select', options: [] },
+              { key: 'channel', label: 'Kênh', type: 'select', options: [{ value: 'email', text: 'Email' }, { value: 'sms', text: 'SMS' }, { value: 'push', text: 'Push' }] },
+              { key: 'subject', label: 'Tiêu đề', type: 'text' },
+              { key: 'body', label: 'Nội dung', type: 'textarea' },
+              { key: 'tags', label: 'Tags (phân tách dấu phẩy)', type: 'text' },
+              { key: 'status', label: 'Trạng thái', type: 'select', options: [{ value: 'sent', text: 'Đã gửi' }, { value: 'failed', text: 'Thất bại' }] }
+            ],
+            load: async function () {
+              const data = await api.messages.list();
+              // Remove duplicates by id
+              const dedup = [];
+              data.forEach(row => {
+                if (!dedup.some(item => item.id === row.id)) dedup.push(row);
+              });
+              this.data = dedup;
+              const container = $('#section-messages');
+              const toolbar = $('<div class="toolbar"></div>');
+              const refreshBtn = $('<button class="btn">Tải lại</button>').on('click', () => this.load());
+              const addBtn = $('<button class="btn primary">Thêm</button>').on('click', async () => {
+                const players = await api.players.list();
+                this.fields.find(f => f.key === 'player_id').options = [{ value: '', text: '(Không)' }].concat(players.map(p => ({ value: p.id, text: p.name })));
+                openDrawer('Gửi tin nhắn', null, 'messages');
+              });
+              toolbar.append(refreshBtn, addBtn);
+              const tableContainer = $('<div></div>');
+              renderTable(tableContainer,
+                [
+                  { key: 'player_name', label: 'Hội viên' },
+                  { key: 'channel', label: 'Kênh' },
+                  { key: 'subject', label: 'Tiêu đề' },
+                  { key: 'sent_at', label: 'Thời gian' },
+                  { key: 'status', label: 'Trạng thái' }
+                ],
+                data,
+                { actions: false }
+              );
+              container.empty().append($('<div class="card"></div>').append(toolbar, tableContainer));
+            },
+            create: (d) => api.messages.create({
+              player_id: d.player_id ? parseInt(d.player_id, 10) : null,
+              channel: d.channel,
+              subject: d.subject,
+              body: d.body,
+              tags: d.tags ? d.tags.split(',').map(x => x.trim()) : null,
+              status: d.status
+            }),
+            patch: null,
+            remove: null
+          },
+          payments: {
+            data: [],
+            load: async function () {
+              const container = $('#section-payments');
+              container.empty();
 
-            const formCard = $('<div class="card"></div>');
-            const isUpdate = !!existingPayment;
-            formCard.append(`<h3>${isUpdate ? 'Cập nhật thanh toán' : 'Thanh toán đơn đặt sân'}</h3>`);
+              // Check if there's a pending payment for a reservation
+              if (window.pendingPaymentReservation) {
+                // Show payment form
+                this.renderPaymentForm(container);
+              } else {
+                // Show payment history
+                await this.renderPaymentHistory(container);
+              }
+            },
+            renderPaymentForm: async function (container) {
+              const reservation = window.pendingPaymentReservation;
+              const self = this; // Store reference to module
 
-            // Reservation info (read-only)
-            const infoSection = $('<div style="background: var(--bg-secondary); padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;"></div>');
-            infoSection.append(`
+              // Check if this reservation already has a payment
+              let existingPayment = null;
+              try {
+                const allPayments = await api.payments.list();
+                existingPayment = allPayments.find(p =>
+                  p.source_type === 'reservation' && p.source_id === reservation.id
+                );
+              } catch (err) {
+                console.error('Error checking existing payment:', err);
+              }
+
+              const formCard = $('<div class="card"></div>');
+              const isUpdate = !!existingPayment;
+              formCard.append(`<h3>${isUpdate ? 'Cập nhật thanh toán' : 'Thanh toán đơn đặt sân'}</h3>`);
+
+              // Reservation info (read-only)
+              const infoSection = $('<div style="background: var(--bg-secondary); padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;"></div>');
+              infoSection.append(`
               <div style="margin-bottom: 0.5rem;"><strong>Sân:</strong> ${reservation.court_name}</div>
               <div style="margin-bottom: 0.5rem;"><strong>Người đặt:</strong> ${reservation.player_name}</div>
               <div style="margin-bottom: 0.5rem;"><strong>Thời gian:</strong> ${reservation.start_time} → ${reservation.end_time}</div>
               <div style="margin-bottom: 0.5rem;"><strong>Số tiền:</strong> <span style="color: var(--brand); font-size: 1.2em; font-weight: bold;">${formatCurrency(reservation.price_cents)}</span></div>
             `);
 
-            if (isUpdate) {
-              infoSection.append(`
+              if (isUpdate) {
+                infoSection.append(`
                 <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border);">
                   <div style="color: var(--muted); font-size: 0.9em;">Thanh toán hiện tại:</div>
                   <div style="margin-top: 0.5rem;"><strong>Phương thức:</strong> ${existingPayment.method}</div>
                   <div><strong>Ngày tạo:</strong> ${new Date(existingPayment.created_at).toLocaleString('vi-VN')}</div>
                 </div>
               `);
-            }
+              }
 
-            formCard.append(infoSection);
+              formCard.append(infoSection);
 
-            // Payment method selection
-            const methodGroup = $('<div class="form-group"></div>');
-            methodGroup.append('<label>Hình thức thanh toán:</label>');
-            const methodSelect = $(`
+              // Payment method selection
+              const methodGroup = $('<div class="form-group"></div>');
+              methodGroup.append('<label>Hình thức thanh toán:</label>');
+              const methodSelect = $(`
               <select id="payment-method" style="width: 100%; padding: 0.5rem; border: 1px solid var(--border); border-radius: 4px;">
                 <option value="cash">Tiền mặt</option>
                 <option value="card">Thẻ</option>
@@ -1853,178 +2051,178 @@
               </select>
             `);
 
-            // Set current method if updating
-            if (isUpdate) {
-              methodSelect.val(existingPayment.method);
-            }
-
-            methodGroup.append(methodSelect);
-            formCard.append(methodGroup);
-
-            // Action buttons
-            const btnGroup = $('<div style="margin-top: 1.5rem; display: flex; gap: 1rem;"></div>');
-            const confirmBtn = $(`<button class="btn primary">${isUpdate ? 'Cập nhật thanh toán' : 'Xác nhận thanh toán'}</button>`);
-            const cancelBtn = $('<button class="btn">Hủy</button>');
-
-            confirmBtn.on('click', async () => {
-              const method = $('#payment-method').val();
-              try {
-                if (isUpdate) {
-                  // Update existing payment
-                  await api.payments.patch(existingPayment.id, {
-                    method: method,
-                    amount_cents: reservation.price_cents
-                  });
-                  showToast('Cập nhật thanh toán thành công!', 'success');
-                } else {
-                  // Create new payment
-                  await api.payments.create({
-                    player_id: reservation.player_id,
-                    amount_cents: reservation.price_cents,
-                    currency: 'VND',
-                    source_type: 'reservation',
-                    source_id: reservation.id,
-                    method: method,
-                    status: 'succeeded'
-                  });
-                  showToast('Thanh toán thành công!', 'success');
-                }
-
-                window.pendingPaymentReservation = null;
-
-                // Reload payment history and reservations
-                await self.load();
-                await modules.reservations.load();
-              } catch (err) {
-                showToast('Lỗi thanh toán: ' + (err.responseJSON?.error || err.statusText), 'error');
+              // Set current method if updating
+              if (isUpdate) {
+                methodSelect.val(existingPayment.method);
               }
-            });
 
-            cancelBtn.on('click', () => {
-              window.pendingPaymentReservation = null;
-              self.load();
-            });
+              methodGroup.append(methodSelect);
+              formCard.append(methodGroup);
 
-            btnGroup.append(confirmBtn, cancelBtn);
-            formCard.append(btnGroup);
-            container.append(formCard);
-          },
-          renderPaymentHistory: async function (container) {
-            const data = await api.payments.list();
-            this.data = data;
+              // Action buttons
+              const btnGroup = $('<div style="margin-top: 1.5rem; display: flex; gap: 1rem;"></div>');
+              const confirmBtn = $(`<button class="btn primary">${isUpdate ? 'Cập nhật thanh toán' : 'Xác nhận thanh toán'}</button>`);
+              const cancelBtn = $('<button class="btn">Hủy</button>');
 
+              confirmBtn.on('click', async () => {
+                const method = $('#payment-method').val();
+                try {
+                  if (isUpdate) {
+                    // Update existing payment
+                    await api.payments.patch(existingPayment.id, {
+                      method: method,
+                      amount_cents: reservation.price_cents
+                    });
+                    showToast('Cập nhật thanh toán thành công!', 'success');
+                  } else {
+                    // Create new payment
+                    await api.payments.create({
+                      player_id: reservation.player_id,
+                      amount_cents: reservation.price_cents,
+                      currency: 'VND',
+                      source_type: 'reservation',
+                      source_id: reservation.id,
+                      method: method,
+                      status: 'succeeded'
+                    });
+                    showToast('Thanh toán thành công!', 'success');
+                  }
+
+                  window.pendingPaymentReservation = null;
+
+                  // Reload payment history and reservations
+                  await self.load();
+                  await modules.reservations.load();
+                } catch (err) {
+                  showToast('Lỗi thanh toán: ' + (err.responseJSON?.error || err.statusText), 'error');
+                }
+              });
+
+              cancelBtn.on('click', () => {
+                window.pendingPaymentReservation = null;
+                self.load();
+              });
+
+              btnGroup.append(confirmBtn, cancelBtn);
+              formCard.append(btnGroup);
+              container.append(formCard);
+            },
+            renderPaymentHistory: async function (container) {
+              const data = await api.payments.list();
+              this.data = data;
+
+              const card = $('<div class="card"></div>');
+              card.append('<h3>Lịch sử thanh toán</h3>');
+
+              const toolbar = $('<div class="toolbar"></div>');
+              const refreshBtn = $('<button class="btn">Tải lại</button>').on('click', () => this.load());
+              toolbar.append(refreshBtn);
+
+              const tableContainer = $('<div></div>');
+              renderTable(tableContainer,
+                [
+                  { key: 'id', label: 'ID' },
+                  { key: 'player_name', label: 'Người chơi' },
+                  { key: 'amount_cents', label: 'Số tiền', render: (v) => formatCurrency(v) },
+                  { key: 'source_type', label: 'Nguồn' },
+                  { key: 'method', label: 'Phương thức' },
+                  { key: 'created_at', label: 'Ngày tạo', render: (v) => new Date(v).toLocaleString('vi-VN') }
+                ],
+                data,
+                { actions: false }
+              );
+
+              card.append(toolbar, tableContainer);
+              container.append(card);
+            }
+          }
+        };
+
+        // Load schedule view in right panel
+        async function loadSchedule() {
+          const sched = await api.reports.schedule();
+          const container = $('#schedule-container');
+          container.empty();
+          // Group by date then by court
+          const reservations = sched.reservations;
+          const waitlist = sched.waitlist;
+          const grouped = {};
+          reservations.forEach(r => {
+            const d = r.start_time.slice(0, 10);
+            if (!grouped[d]) grouped[d] = { reservations: [], waitlist: [] };
+            grouped[d].reservations.push(r);
+          });
+          waitlist.forEach(w => {
+            const d = w.start_time.slice(0, 10);
+            if (!grouped[d]) grouped[d] = { reservations: [], waitlist: [] };
+            grouped[d].waitlist.push(w);
+          });
+          for (const date in grouped) {
+            const group = grouped[date];
             const card = $('<div class="card"></div>');
-            card.append('<h3>Lịch sử thanh toán</h3>');
-
-            const toolbar = $('<div class="toolbar"></div>');
-            const refreshBtn = $('<button class="btn">Tải lại</button>').on('click', () => this.load());
-            toolbar.append(refreshBtn);
-
-            const tableContainer = $('<div></div>');
-            renderTable(tableContainer,
-              [
-                { key: 'id', label: 'ID' },
-                { key: 'player_name', label: 'Người chơi' },
-                { key: 'amount_cents', label: 'Số tiền', render: (v) => formatCurrency(v) },
-                { key: 'source_type', label: 'Nguồn' },
-                { key: 'method', label: 'Phương thức' },
-                { key: 'created_at', label: 'Ngày tạo', render: (v) => new Date(v).toLocaleString('vi-VN') }
-              ],
-              data,
-              { actions: false }
-            );
-
-            card.append(toolbar, tableContainer);
+            card.append(`<h3>${date}</h3>`);
+            const resTbl = $('<div></div>');
+            renderTable(resTbl, [{ key: 'court_name', label: 'Sân' }, { key: 'player_name', label: 'Người đặt' }, { key: 'start_time', label: 'Bắt đầu' }, { key: 'end_time', label: 'Kết thúc' }, { key: 'status', label: 'Trạng thái' }], group.reservations);
+            card.append('<strong>Đặt sân</strong>');
+            card.append(resTbl);
+            const waitTbl = $('<div></div>');
+            renderTable(waitTbl, [{ key: 'court_name', label: 'Sân' }, { key: 'player_name', label: 'Người đợi' }, { key: 'start_time', label: 'Bắt đầu' }, { key: 'end_time', label: 'Kết thúc' }, { key: 'status', label: 'Trạng thái' }], group.waitlist);
+            card.append('<strong>Danh sách chờ</strong>');
+            card.append(waitTbl);
             container.append(card);
           }
         }
-      };
 
-      // Load schedule view in right panel
-      async function loadSchedule() {
-        const sched = await api.reports.schedule();
-        const container = $('#schedule-container');
-        container.empty();
-        // Group by date then by court
-        const reservations = sched.reservations;
-        const waitlist = sched.waitlist;
-        const grouped = {};
-        reservations.forEach(r => {
-          const d = r.start_time.slice(0, 10);
-          if (!grouped[d]) grouped[d] = { reservations: [], waitlist: [] };
-          grouped[d].reservations.push(r);
+        // Navigation
+        $('nav button').on('click', function () {
+          $('nav button').removeClass('active');
+          $(this).addClass('active');
+          const section = $(this).data('section');
+          $('.section').hide();
+          $('#section-' + section).show();
+
+          // Hide/Show right panel based on section
+          if (section === 'reservations') {
+            $('#right-panel').show();
+            $('#schedule-view').show();
+            loadSchedule();
+          } else {
+            $('#right-panel').hide();
+          }
+
+          // Load data for section
+          if (section === 'players') modules.players.load();
+          else if (section === 'courts') modules.courts.load();
+          else if (section === 'reservations') modules.reservations.load();
+          else if (section === 'waitlist') modules.waitlist.load();
+          else if (section === 'events') modules.events.load();
+          else if (section === 'memberships') modules.memberships.load();
+          else if (section === 'payments') modules.payments.load();
+          else if (section === 'notifications') modules.notifications.load();
+          else if (section === 'messages') modules.messages.load();
         });
-        waitlist.forEach(w => {
-          const d = w.start_time.slice(0, 10);
-          if (!grouped[d]) grouped[d] = { reservations: [], waitlist: [] };
-          grouped[d].waitlist.push(w);
-        });
-        for (const date in grouped) {
-          const group = grouped[date];
-          const card = $('<div class="card"></div>');
-          card.append(`<h3>${date}</h3>`);
-          const resTbl = $('<div></div>');
-          renderTable(resTbl, [{ key: 'court_name', label: 'Sân' }, { key: 'player_name', label: 'Người đặt' }, { key: 'start_time', label: 'Bắt đầu' }, { key: 'end_time', label: 'Kết thúc' }, { key: 'status', label: 'Trạng thái' }], group.reservations);
-          card.append('<strong>Đặt sân</strong>');
-          card.append(resTbl);
-          const waitTbl = $('<div></div>');
-          renderTable(waitTbl, [{ key: 'court_name', label: 'Sân' }, { key: 'player_name', label: 'Người đợi' }, { key: 'start_time', label: 'Bắt đầu' }, { key: 'end_time', label: 'Kết thúc' }, { key: 'status', label: 'Trạng thái' }], group.waitlist);
-          card.append('<strong>Danh sách chờ</strong>');
-          card.append(waitTbl);
-          container.append(card);
-        }
-      }
+        // default load players
+        modules.players.load();
 
-      // Navigation
-      $('nav button').on('click', function () {
-        $('nav button').removeClass('active');
-        $(this).addClass('active');
-        const section = $(this).data('section');
-        $('.section').hide();
-        $('#section-' + section).show();
-
-        // Hide/Show right panel based on section
-        if (section === 'reservations') {
-          $('#right-panel').show();
-          $('#schedule-view').show();
-          loadSchedule();
-        } else {
-          $('#right-panel').hide();
-        }
-
-        // Load data for section
-        if (section === 'players') modules.players.load();
-        else if (section === 'courts') modules.courts.load();
-        else if (section === 'reservations') modules.reservations.load();
-        else if (section === 'waitlist') modules.waitlist.load();
-        else if (section === 'events') modules.events.load();
-        else if (section === 'memberships') modules.memberships.load();
-        else if (section === 'payments') modules.payments.load();
-        else if (section === 'notifications') modules.notifications.load();
-        else if (section === 'messages') modules.messages.load();
-      });
-      // default load players
-      modules.players.load();
-
-      // Resizable handle
-      (() => {
-        const split = $('.container');
-        const handle = $('#drag-handle');
-        let dragging = false;
-        handle.on('mousedown touchstart', (e) => { dragging = true; $('body').css('user-select', 'none'); });
-        $(window).on('mousemove touchmove', (e) => {
-          if (!dragging) return;
-          const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-          const total = window.innerWidth;
-          const minLeft = 300;
-          const minRight = 280;
-          const leftW = Math.min(Math.max(clientX, minLeft), total - minRight);
-          const rightW = total - leftW - 8;
-          split.css('grid-template-columns', `${leftW}px 8px ${rightW}px`);
-        });
-        $(window).on('mouseup touchend', () => { dragging = false; $('body').css('user-select', ''); });
+        // Resizable handle
+        (() => {
+          const split = $('.container');
+          const handle = $('#drag-handle');
+          let dragging = false;
+          handle.on('mousedown touchstart', (e) => { dragging = true; $('body').css('user-select', 'none'); });
+          $(window).on('mousemove touchmove', (e) => {
+            if (!dragging) return;
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const total = window.innerWidth;
+            const minLeft = 300;
+            const minRight = 280;
+            const leftW = Math.min(Math.max(clientX, minLeft), total - minRight);
+            const rightW = total - leftW - 8;
+            split.css('grid-template-columns', `${leftW}px 8px ${rightW}px`);
+          });
+          $(window).on('mouseup touchend', () => { dragging = false; $('body').css('user-select', ''); });
+        })();
       })();
-    })();
   </script>
 </body>
 

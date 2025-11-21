@@ -8,7 +8,7 @@ const pool = mysql.createPool({
   port: process.env.MYSQL_PORT ? parseInt(process.env.MYSQL_PORT, 10) : 3306,
   user: process.env.MYSQL_USER || 'root',
   password: process.env.MYSQL_PASSWORD || '27596',
-  database: process.env.MYSQL_DATABASE || ' ',
+  database: process.env.MYSQL_DATABASE || 'pickleball',
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0
@@ -214,10 +214,10 @@ async function init() {
   // Seed some sample data
   const players = [
     ['Nguyen Van A', '0901002001', 'a@example.com', 'active', '2025-12-31'],
-    ['Tran Thi B',   '0901002002', 'b@example.com', 'expired', '2024-10-15'],
-    ['Le Van C',     '0901002003', 'c@example.com', 'active', '2026-01-10'],
-    ['Pham Thi D',   '0901002004', 'd@example.com', 'none', null],
-    ['Hoang Van E',  '0901002005', 'e@example.com', 'active', '2025-07-20']
+    ['Tran Thi B', '0901002002', 'b@example.com', 'expired', '2024-10-15'],
+    ['Le Van C', '0901002003', 'c@example.com', 'active', '2026-01-10'],
+    ['Pham Thi D', '0901002004', 'd@example.com', 'none', null],
+    ['Hoang Van E', '0901002005', 'e@example.com', 'active', '2025-07-20']
   ];
   for (const p of players) {
     await run('INSERT INTO players (name, phone, email, status, expiry) VALUES (?,?,?,?,?)', p);
@@ -268,6 +268,85 @@ async function init() {
   // Sample payments
   await run('INSERT INTO payments (player_id, amount_cents, source_type, source_id, method, status) VALUES (1, 4000000, "membership", 1, "card", "succeeded")');
   await run('INSERT INTO payments (player_id, amount_cents, source_type, source_id, method, status) VALUES (1, 100000, "reservation", 1, "cash", "succeeded")');
+
+  // Generate sample data from 2025-11-30 to 2025-12-03
+  console.log('Generating sample data from 2025-11-30 to 2025-12-03...');
+  const startDate = new Date('2025-11-30');
+  const endDate = new Date('2025-12-03');
+  const loopDate = new Date(startDate);
+
+  while (loopDate <= endDate) {
+    const dateStr = loopDate.toISOString().slice(0, 10);
+    const isLastDay = dateStr === '2025-12-03';
+
+    // If last day (Dec 3), we only want 1-2 reservations TOTAL, not per court
+    if (isLastDay) {
+      const totalSlots = Math.floor(Math.random() * 2) + 1; // 1 or 2
+      for (let k = 0; k < totalSlots; k++) {
+        const courtId = Math.floor(Math.random() * 3) + 1;
+        const hour = Math.floor(Math.random() * 10) + 8; // 8am - 6pm
+        const start = `${dateStr} ${String(hour).padStart(2, '0')}:00`;
+        const end = `${dateStr} ${String(hour + 1).padStart(2, '0')}:00`;
+        const playerId = Math.floor(Math.random() * 5) + 1;
+        const price = 100000 + Math.floor(Math.random() * 3) * 50000;
+        const isPaid = Math.random() < 0.7;
+        const payStatus = isPaid ? 'paid' : 'unpaid';
+
+        const res = await run('INSERT INTO reservations (court_id, player_id, start_time, end_time, status, price_cents, payment_status) VALUES (?,?,?,?,?,?,?)',
+          [courtId, playerId, start, end, 'booked', price, payStatus]);
+
+        if (isPaid) {
+          const methods = ['cash', 'card', 'transfer'];
+          const method = methods[Math.floor(Math.random() * methods.length)];
+          await run('INSERT INTO payments (player_id, amount_cents, source_type, source_id, method, status) VALUES (?, ?, "reservation", ?, ?, "succeeded")',
+            [playerId, price, res.insertId, method]);
+        }
+      }
+    } else {
+      // Normal generation for Nov 30 - Dec 2
+      // For each court
+      for (let courtId = 1; courtId <= 3; courtId++) {
+        // Available hours: 6 to 21 (last slot starts at 20:00)
+        const availableHours = [];
+        for (let h = 6; h <= 20; h++) availableHours.push(h);
+
+        // Shuffle hours to pick random slots without overlap
+        for (let i = availableHours.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [availableHours[i], availableHours[j]] = [availableHours[j], availableHours[i]];
+        }
+
+        // Pick 4-8 slots per court per day
+        const numSlots = Math.floor(Math.random() * 5) + 4;
+        const selectedHours = availableHours.slice(0, numSlots);
+
+        for (const hour of selectedHours) {
+          const start = `${dateStr} ${String(hour).padStart(2, '0')}:00`;
+          const end = `${dateStr} ${String(hour + 1).padStart(2, '0')}:00`;
+
+          // Random player 1-5
+          const playerId = Math.floor(Math.random() * 5) + 1;
+          const status = 'booked';
+          const price = 100000 + Math.floor(Math.random() * 3) * 50000; // 100k, 150k, 200k
+
+          // Random payment status (70% paid)
+          const isPaid = Math.random() < 0.7;
+          const payStatus = isPaid ? 'paid' : 'unpaid';
+
+          const res = await run('INSERT INTO reservations (court_id, player_id, start_time, end_time, status, price_cents, payment_status) VALUES (?,?,?,?,?,?,?)',
+            [courtId, playerId, start, end, status, price, payStatus]);
+
+          if (isPaid) {
+            const methods = ['cash', 'card', 'transfer'];
+            const method = methods[Math.floor(Math.random() * methods.length)];
+            await run('INSERT INTO payments (player_id, amount_cents, source_type, source_id, method, status) VALUES (?, ?, "reservation", ?, ?, "succeeded")',
+              [playerId, price, res.insertId, method]);
+          }
+        }
+      }
+    }
+    loopDate.setDate(loopDate.getDate() + 1);
+  }
 
   console.log('Database initialized');
   await pool.end();
