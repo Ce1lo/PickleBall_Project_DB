@@ -1,8 +1,4 @@
 import express from 'express';
-// Switch database from SQLite to MySQL
-// We use the mysql2/promise module to create an async connection pool.  The
-// connection settings can be controlled via environment variables so the
-// application does not hard‑code credentials.  See the README for details.
 import mysql from 'mysql2/promise';
 import cors from 'cors';
 import path from 'path';
@@ -663,83 +659,6 @@ app.delete('/api/memberships/:id', async (req, res) => {
   }
 });
 
-// Payments
-app.get('/api/payments', async (req, res) => {
-  try {
-    const rows = await allAsync(
-      `SELECT pay.id, pay.player_id, p.name AS player_name, pay.amount_cents, pay.currency, pay.source_type, pay.source_id, pay.method, pay.status, pay.created_at
-       FROM payments pay
-       JOIN players p ON p.id = pay.player_id
-       ORDER BY pay.created_at DESC`);
-    res.json(rows);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-app.post('/api/payments', async (req, res) => {
-  const { player_id, amount_cents, currency, source_type, source_id, method, status } = req.body;
-  try {
-    const result = await runAsync(
-      'INSERT INTO payments (player_id, amount_cents, currency, source_type, source_id, method, status) VALUES (?,?,?,?,?,?,?)',
-      [player_id, amount_cents, currency || 'VND', source_type, source_id, method, status || 'pending']
-    );
-    // If payment relates to a reservation and succeeded, update reservation payment_status
-    if (source_type === 'reservation' && source_id) {
-      // If no status provided or status is not provided, treat pending; but if status is 'succeeded' then update
-      const payStatus = status || 'pending';
-      if (payStatus === 'succeeded' || payStatus === 'paid') {
-        await runAsync('UPDATE reservations SET payment_status = "paid" WHERE id = ?', [source_id]);
-      }
-    }
-    const row = await getAsync(
-      `SELECT pay.id, pay.player_id, p.name AS player_name, pay.amount_cents, pay.currency, pay.source_type, pay.source_id, pay.method, pay.status, pay.created_at
-       FROM payments pay
-       JOIN players p ON p.id = pay.player_id
-       WHERE pay.id = ?`,
-      [result.lastID]
-    );
-    res.status(201).json(row);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-app.patch('/api/payments/:id', async (req, res) => {
-  const id = parseInt(req.params.id, 10);
-  const fields = req.body;
-  const setClauses = [];
-  const values = [];
-  for (const key of Object.keys(fields)) {
-    setClauses.push(`${key} = ?`);
-    values.push(fields[key]);
-  }
-  values.push(id);
-  try {
-    await runAsync(`UPDATE payments SET ${setClauses.join(', ')} WHERE id = ?`, values);
-    const row = await getAsync(
-      `SELECT pay.id, pay.player_id, p.name AS player_name, pay.amount_cents, pay.currency, pay.source_type, pay.source_id, pay.method, pay.status, pay.created_at
-       FROM payments pay
-       JOIN players p ON p.id = pay.player_id
-       WHERE pay.id = ?`,
-      [id]
-    );
-    res.json(row);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-app.delete('/api/payments/:id', async (req, res) => {
-  const id = parseInt(req.params.id, 10);
-  try {
-    await runAsync('DELETE FROM payments WHERE id = ?', [id]);
-    res.json({ ok: true });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
 // Notifications
 app.get('/api/notifications-queue', async (req, res) => {
   try {
@@ -804,6 +723,95 @@ app.delete('/api/notifications-queue/:id', async (req, res) => {
   const id = parseInt(req.params.id, 10);
   try {
     await runAsync('DELETE FROM notifications WHERE id = ?', [id]);
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Payments
+app.get('/api/payments', async (req, res) => {
+  try {
+    const rows = await allAsync(
+      `SELECT pay.id, pay.player_id, p.name AS player_name, pay.amount_cents, pay.currency, 
+              pay.source_type, pay.source_id, pay.method, pay.status, pay.created_at
+       FROM payments pay
+       JOIN players p ON p.id = pay.player_id
+       ORDER BY pay.created_at DESC`
+    );
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/payments', async (req, res) => {
+  const { player_id, amount_cents, currency, source_type, source_id, method, status } = req.body;
+  try {
+    // Create payment record
+    const result = await runAsync(
+      'INSERT INTO payments (player_id, amount_cents, currency, source_type, source_id, method, status) VALUES (?,?,?,?,?,?,?)',
+      [player_id, amount_cents, currency || 'VND', source_type, source_id || null, method, status || 'succeeded']
+    );
+
+    // If payment is for a reservation and succeeded, update reservation payment_status
+    if (source_type === 'reservation' && source_id && status === 'succeeded') {
+      await runAsync('UPDATE reservations SET payment_status = ? WHERE id = ?', ['paid', source_id]);
+    }
+
+    // Return created payment with player info
+    const row = await getAsync(
+      `SELECT pay.id, pay.player_id, p.name AS player_name, pay.amount_cents, pay.currency, 
+              pay.source_type, pay.source_id, pay.method, pay.status, pay.created_at
+       FROM payments pay
+       JOIN players p ON p.id = pay.player_id
+       WHERE pay.id = ?`,
+      [result.lastID]
+    );
+    res.status(201).json(row);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.patch('/api/payments/:id', async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  const fields = req.body;
+  const setClauses = [];
+  const values = [];
+  for (const key of Object.keys(fields)) {
+    setClauses.push(`${key} = ?`);
+    values.push(fields[key]);
+  }
+  values.push(id);
+  try {
+    await runAsync(`UPDATE payments SET ${setClauses.join(', ')} WHERE id = ?`, values);
+
+    // Fetch updated payment to check if we need to update reservation
+    const row = await getAsync(
+      `SELECT pay.id, pay.player_id, p.name AS player_name, pay.amount_cents, pay.currency, 
+              pay.source_type, pay.source_id, pay.method, pay.status, pay.created_at
+       FROM payments pay
+       JOIN players p ON p.id = pay.player_id
+       WHERE pay.id = ?`,
+      [id]
+    );
+
+    // If payment is for a reservation, ensure reservation is marked as paid
+    if (row.source_type === 'reservation' && row.source_id) {
+      await runAsync('UPDATE reservations SET payment_status = ? WHERE id = ?', ['paid', row.source_id]);
+    }
+
+    res.json(row);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.delete('/api/payments/:id', async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  try {
+    await runAsync('DELETE FROM payments WHERE id = ?', [id]);
     res.json({ ok: true });
   } catch (err) {
     res.status(500).json({ error: err.message });

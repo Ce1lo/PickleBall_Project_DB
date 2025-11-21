@@ -767,6 +767,13 @@
         }, 3000);
       }
 
+      // Currency formatter helper
+      function formatCurrency(cents) {
+        if (cents == null) return '0 ₫';
+        const dong = cents; // already in dong, not cents
+        return dong.toLocaleString('vi-VN') + ' ₫';
+      }
+
       // Helper to render table rows for generic data
       function renderTable(container, columns, data, opts = {}) {
         const thead = $('<thead><tr></tr></thead>');
@@ -913,17 +920,6 @@
           data[f.key] = $('#f_' + f.key).val();
         });
         try {
-          // Special handling for payment form
-          if (drawerMode === 'pay') {
-            // Use the selected payment method
-            const method = $('#f_method').val();
-            await modules.pay.create({ method });
-            // reload reservations to reflect payment_status
-            await modules.reservations.load();
-            closeDrawer();
-            showToast('Thanh toán thành công!', 'success');
-            return;
-          }
           let result;
           if (currentId) {
             // diff for patch
@@ -1324,9 +1320,9 @@
                   api.reservations.remove(id).then(() => this.load());
                 }
               } else if (action === 'pay') {
-                // open payment drawer for selected reservation
-                window.currentReservation = row;
-                openDrawer('Thanh toán', { method: 'cash' }, 'pay');
+                // Set pending payment and switch to payments tab
+                window.pendingPaymentReservation = row;
+                $('nav button[data-section="payments"]').click();
               }
             });
             // append content
@@ -1790,39 +1786,157 @@
           patch: null,
           remove: null
         },
-        // Module for processing payments on a reservation
-        pay: {
-          fields: [
-            {
-              key: 'method',
-              label: 'Phương thức thanh toán',
-              type: 'select',
-              options: [
-                { value: 'cash', text: 'Tiền mặt' },
-                { value: 'card', text: 'Thẻ' },
-                { value: 'bank', text: 'Chuyển khoản' },
-                { value: 'wallet', text: 'Ví điện tử' }
-              ]
+        payments: {
+          data: [],
+          load: async function () {
+            const container = $('#section-payments');
+            container.empty();
+
+            // Check if there's a pending payment for a reservation
+            if (window.pendingPaymentReservation) {
+              // Show payment form
+              this.renderPaymentForm(container);
+            } else {
+              // Show payment history
+              await this.renderPaymentHistory(container);
             }
-          ],
-          // Payment form does not load data from API
-          load: null,
-          create: async function (d) {
-            const r = window.currentReservation;
-            if (!r) throw new Error('No reservation selected');
-            const payload = {
-              player_id: r.player_id,
-              amount_cents: r.price_cents || 0,
-              currency: 'VND',
-              source_type: 'reservation',
-              source_id: r.id,
-              method: d.method,
-              status: 'succeeded'
-            };
-            return await api.payments.create(payload);
           },
-          patch: null,
-          remove: null
+          renderPaymentForm: async function (container) {
+            const reservation = window.pendingPaymentReservation;
+            const self = this; // Store reference to module
+
+            // Check if this reservation already has a payment
+            let existingPayment = null;
+            try {
+              const allPayments = await api.payments.list();
+              existingPayment = allPayments.find(p =>
+                p.source_type === 'reservation' && p.source_id === reservation.id
+              );
+            } catch (err) {
+              console.error('Error checking existing payment:', err);
+            }
+
+            const formCard = $('<div class="card"></div>');
+            const isUpdate = !!existingPayment;
+            formCard.append(`<h3>${isUpdate ? 'Cập nhật thanh toán' : 'Thanh toán đơn đặt sân'}</h3>`);
+
+            // Reservation info (read-only)
+            const infoSection = $('<div style="background: var(--bg-secondary); padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;"></div>');
+            infoSection.append(`
+              <div style="margin-bottom: 0.5rem;"><strong>Sân:</strong> ${reservation.court_name}</div>
+              <div style="margin-bottom: 0.5rem;"><strong>Người đặt:</strong> ${reservation.player_name}</div>
+              <div style="margin-bottom: 0.5rem;"><strong>Thời gian:</strong> ${reservation.start_time} → ${reservation.end_time}</div>
+              <div style="margin-bottom: 0.5rem;"><strong>Số tiền:</strong> <span style="color: var(--brand); font-size: 1.2em; font-weight: bold;">${formatCurrency(reservation.price_cents)}</span></div>
+            `);
+
+            if (isUpdate) {
+              infoSection.append(`
+                <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border);">
+                  <div style="color: var(--muted); font-size: 0.9em;">Thanh toán hiện tại:</div>
+                  <div style="margin-top: 0.5rem;"><strong>Phương thức:</strong> ${existingPayment.method}</div>
+                  <div><strong>Ngày tạo:</strong> ${new Date(existingPayment.created_at).toLocaleString('vi-VN')}</div>
+                </div>
+              `);
+            }
+
+            formCard.append(infoSection);
+
+            // Payment method selection
+            const methodGroup = $('<div class="form-group"></div>');
+            methodGroup.append('<label>Hình thức thanh toán:</label>');
+            const methodSelect = $(`
+              <select id="payment-method" style="width: 100%; padding: 0.5rem; border: 1px solid var(--border); border-radius: 4px;">
+                <option value="cash">Tiền mặt</option>
+                <option value="card">Thẻ</option>
+                <option value="bank">Chuyển khoản ngân hàng</option>
+                <option value="wallet">Ví điện tử</option>
+              </select>
+            `);
+
+            // Set current method if updating
+            if (isUpdate) {
+              methodSelect.val(existingPayment.method);
+            }
+
+            methodGroup.append(methodSelect);
+            formCard.append(methodGroup);
+
+            // Action buttons
+            const btnGroup = $('<div style="margin-top: 1.5rem; display: flex; gap: 1rem;"></div>');
+            const confirmBtn = $(`<button class="btn primary">${isUpdate ? 'Cập nhật thanh toán' : 'Xác nhận thanh toán'}</button>`);
+            const cancelBtn = $('<button class="btn">Hủy</button>');
+
+            confirmBtn.on('click', async () => {
+              const method = $('#payment-method').val();
+              try {
+                if (isUpdate) {
+                  // Update existing payment
+                  await api.payments.patch(existingPayment.id, {
+                    method: method,
+                    amount_cents: reservation.price_cents
+                  });
+                  showToast('Cập nhật thanh toán thành công!', 'success');
+                } else {
+                  // Create new payment
+                  await api.payments.create({
+                    player_id: reservation.player_id,
+                    amount_cents: reservation.price_cents,
+                    currency: 'VND',
+                    source_type: 'reservation',
+                    source_id: reservation.id,
+                    method: method,
+                    status: 'succeeded'
+                  });
+                  showToast('Thanh toán thành công!', 'success');
+                }
+
+                window.pendingPaymentReservation = null;
+
+                // Reload payment history and reservations
+                await self.load();
+                await modules.reservations.load();
+              } catch (err) {
+                showToast('Lỗi thanh toán: ' + (err.responseJSON?.error || err.statusText), 'error');
+              }
+            });
+
+            cancelBtn.on('click', () => {
+              window.pendingPaymentReservation = null;
+              self.load();
+            });
+
+            btnGroup.append(confirmBtn, cancelBtn);
+            formCard.append(btnGroup);
+            container.append(formCard);
+          },
+          renderPaymentHistory: async function (container) {
+            const data = await api.payments.list();
+            this.data = data;
+
+            const card = $('<div class="card"></div>');
+            card.append('<h3>Lịch sử thanh toán</h3>');
+
+            const toolbar = $('<div class="toolbar"></div>');
+            const refreshBtn = $('<button class="btn">Tải lại</button>').on('click', () => this.load());
+            toolbar.append(refreshBtn);
+
+            const tableContainer = $('<div></div>');
+            renderTable(tableContainer,
+              [
+                { key: 'id', label: 'ID' },
+                { key: 'player_name', label: 'Người chơi' },
+                { key: 'amount_cents', label: 'Số tiền', render: (v) => formatCurrency(v) },
+                { key: 'source_type', label: 'Nguồn' },
+                { key: 'method', label: 'Phương thức' },
+                { key: 'created_at', label: 'Ngày tạo', render: (v) => new Date(v).toLocaleString('vi-VN') }
+              ],
+              data,
+              { actions: false }
+            );
+
+            card.append(toolbar, tableContainer);
+            container.append(card);
+          }
         }
       };
 
@@ -1868,11 +1982,26 @@
         const section = $(this).data('section');
         $('.section').hide();
         $('#section-' + section).show();
-        // Hide schedule view by default; report view removed
-        $('#schedule-view').hide();
-        if (modules[section]) {
-          modules[section].load();
+
+        // Hide/Show right panel based on section
+        if (section === 'reservations') {
+          $('#right-panel').show();
+          $('#schedule-view').show();
+          loadSchedule();
+        } else {
+          $('#right-panel').hide();
         }
+
+        // Load data for section
+        if (section === 'players') modules.players.load();
+        else if (section === 'courts') modules.courts.load();
+        else if (section === 'reservations') modules.reservations.load();
+        else if (section === 'waitlist') modules.waitlist.load();
+        else if (section === 'events') modules.events.load();
+        else if (section === 'memberships') modules.memberships.load();
+        else if (section === 'payments') modules.payments.load();
+        else if (section === 'notifications') modules.notifications.load();
+        else if (section === 'messages') modules.messages.load();
       });
       // default load players
       modules.players.load();
