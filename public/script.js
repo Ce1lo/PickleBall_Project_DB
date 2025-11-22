@@ -1110,18 +1110,14 @@
             { key: 'status', label: 'TRẠNG THÁI' }
           ],
           displayData,
-          { actions: true, onEdit: true, onDelete: true }
+          { actions: true, onEdit: false, onDelete: true }
         );
 
         tableContainer.on('click', 'button[data-action]', async (e) => {
           const id = parseInt($(e.target).closest('tr').data('id'), 10);
           const row = this.data.find(r => r.id === id);
           const action = $(e.target).data('action');
-          if (action === 'edit') {
-            const rcopy = { ...row };
-            rcopy.payment_date = row.payment_date ? row.payment_date.replace(' ', 'T') : '';
-            openDrawer('Sửa thanh toán', rcopy, 'payments');
-          } else if (action === 'delete') {
+          if (action === 'delete') {
             if (confirm('Xoá?')) {
               api.payments.remove(id).then(() => this.load());
             }
