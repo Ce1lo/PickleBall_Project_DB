@@ -34,18 +34,6 @@
       updateRegistration: (id, d) => $.ajax({ url: '/api/event-registrations/' + id, method: 'PATCH', data: JSON.stringify(d), contentType: 'application/json' }),
       removeRegistration: (id) => $.ajax({ url: '/api/event-registrations/' + id, method: 'DELETE' })
     },
-    membershipPlans: {
-      list: () => $.getJSON('/api/membership-plans'),
-      create: (d) => $.ajax({ url: '/api/membership-plans', method: 'POST', data: JSON.stringify(d), contentType: 'application/json' }),
-      patch: (id, d) => $.ajax({ url: '/api/membership-plans/' + id, method: 'PATCH', data: JSON.stringify(d), contentType: 'application/json' }),
-      remove: (id) => $.ajax({ url: '/api/membership-plans/' + id, method: 'DELETE' })
-    },
-    memberships: {
-      list: () => $.getJSON('/api/memberships'),
-      create: (d) => $.ajax({ url: '/api/memberships', method: 'POST', data: JSON.stringify(d), contentType: 'application/json' }),
-      patch: (id, d) => $.ajax({ url: '/api/memberships/' + id, method: 'PATCH', data: JSON.stringify(d), contentType: 'application/json' }),
-      remove: (id) => $.ajax({ url: '/api/memberships/' + id, method: 'DELETE' })
-    },
     payments: {
       list: () => $.getJSON('/api/payments'),
       create: (d) => $.ajax({ url: '/api/payments', method: 'POST', data: JSON.stringify(d), contentType: 'application/json' }),
@@ -561,6 +549,7 @@
           // Render table with payment info
           renderTable(tableContainer,
             [
+              { key: 'order_code', label: 'Mã đơn' },
               { key: 'court_name', label: 'Sân' },
               { key: 'player_name', label: 'Người đặt' },
               { key: 'start_time', label: 'Bắt đầu' },
@@ -884,72 +873,7 @@
       },
       remove: (id) => api.events.remove(id)
     },
-    memberships: {
-      fields: [
-        { key: 'player_id', label: 'Hội viên', type: 'select', options: [] },
-        { key: 'plan_id', label: 'Gói', type: 'select', options: [] },
-        { key: 'start_date', label: 'Ngày bắt đầu', type: 'date' },
-        { key: 'end_date', label: 'Ngày kết thúc', type: 'date' },
-        { key: 'status', label: 'Trạng thái', type: 'select', options: [{ value: 'active', text: 'Hoạt động' }, { value: 'cancelled', text: 'Hủy' }, { value: 'expired', text: 'Hết hạn' }] }
-      ],
-      load: async function () {
-        const data = await api.memberships.list();
-        const dedup = [];
-        data.forEach(row => {
-          if (!dedup.some(item => item.id === row.id)) dedup.push(row);
-        });
-        this.data = dedup;
-        const container = $('#section-memberships');
-        const toolbar = $('<div class="toolbar"></div>');
-        const refreshBtn = $('<button class="btn">Tải lại</button>').on('click', () => this.load());
-        const addBtn = $('<button class="btn primary">Thêm</button>').on('click', async () => {
-          const players = await api.players.list();
-          const plans = await api.membershipPlans.list();
-          this.fields.find(f => f.key === 'player_id').options = players.map(p => ({ value: p.id, text: p.name }));
-          this.fields.find(f => f.key === 'plan_id').options = plans.map(p => ({ value: p.id, text: p.name }));
-          openDrawer('Thêm thẻ hội viên', null, 'memberships');
-        });
-        toolbar.append(refreshBtn, addBtn);
-        const tableContainer = $('<div></div>');
-        renderTable(tableContainer,
-          [
-            { key: 'player_name', label: 'Hội viên' },
-            { key: 'plan_name', label: 'Gói' },
-            { key: 'start_date', label: 'Bắt đầu' },
-            { key: 'end_date', label: 'Kết thúc' },
-            { key: 'status', label: 'Trạng thái' }
-          ],
-          data,
-          { actions: true, onEdit: true, onDelete: true }
-        );
-        tableContainer.on('click', 'button[data-action]', async (e) => {
-          const id = parseInt($(e.target).closest('tr').data('id'), 10);
-          const row = this.data.find(r => r.id === id);
-          const action = $(e.target).data('action');
-          if (action === 'edit') {
-            const players = await api.players.list();
-            const plans = await api.membershipPlans.list();
-            this.fields.find(f => f.key === 'player_id').options = players.map(p => ({ value: p.id, text: p.name }));
-            this.fields.find(f => f.key === 'plan_id').options = plans.map(p => ({ value: p.id, text: p.name }));
-            openDrawer('Sửa thẻ hội viên', row, 'memberships');
-          } else if (action === 'delete') {
-            if (confirm('Xoá?')) {
-              api.memberships.remove(id).then(() => this.load());
-            }
-          }
-        });
-        container.empty().append($('<div class="card"></div>').append(toolbar, tableContainer));
-      },
-      create: (d) => api.memberships.create({
-        player_id: parseInt(d.player_id, 10),
-        plan_id: parseInt(d.plan_id, 10),
-        start_date: d.start_date,
-        end_date: d.end_date,
-        status: d.status
-      }),
-      patch: (id, d) => api.memberships.patch(id, d),
-      remove: (id) => api.memberships.remove(id)
-    },
+
     payments: {
       fields: [
         { key: 'reservation_id', label: 'Mã đặt sân (ID)', type: 'number' },
@@ -961,6 +885,8 @@
       load: async function () {
         const container = $('#section-payments');
 
+
+
         // Check if there is a pending payment from Reservations view
         if (window.pendingPaymentReservation) {
           const res = window.pendingPaymentReservation;
@@ -970,76 +896,165 @@
           let existingPayment = null;
           try {
             const allPayments = await api.payments.list();
-            existingPayment = allPayments.find(p => p.reservation_id === res.id && p.source_type === 'reservation');
+            existingPayment = allPayments.find(p => p.source_id === res.id && p.source_type === 'reservation');
           } catch (e) { console.error(e); }
 
           const isUpdate = !!existingPayment;
-          const title = isUpdate ? 'Cập nhật thanh toán' : 'Thanh toán đặt sân';
-          const btnLabel = isUpdate ? 'Cập nhật' : 'Xác nhận thanh toán';
+          const title = isUpdate ? 'Cập nhật thanh toán' : 'Xác nhận thanh toán';
 
-          const formCard = $('<div class="card" style="max-width:600px;margin:0 auto"></div>');
-          formCard.append(`<h3>${title} #${res.id}</h3>`);
+          const formCard = $('<div class="card" style="max-width:700px;margin:0 auto"></div>');
+          formCard.append(`<h3 style="margin-bottom:24px">${title}</h3>`);
 
-          const info = `
-                  <div style="margin-bottom:20px;padding:15px;background:rgba(15,23,42,0.5);border-radius:8px">
-                    <p><strong>Người đặt:</strong> ${res.player_name}</p>
-                    <p><strong>Sân:</strong> ${res.court_name}</p>
-                    <p><strong>Thời gian:</strong> ${res.start_time} - ${res.end_time}</p>
-                    <p><strong>Số tiền:</strong> <span style="font-size:1.2em;color:#10b981;font-weight:bold">${formatCurrency(res.price_cents)}</span></p>
-                  </div>
-                `;
+          // Order Code Badge
+          if (res.order_code) {
+            formCard.append(`
+              <div style="display:inline-block;margin-bottom:20px;padding:8px 16px;background:linear-gradient(135deg,#10b981,#059669);border-radius:8px;font-family:monospace;font-size:18px;font-weight:700;color:white;box-shadow:0 4px 6px rgba(16,185,129,0.3)">
+                ${res.order_code}
+              </div>
+            `);
+          }
+
+          // Reservation Info Grid
+          const info = $(`
+            <div style="margin-bottom:24px;padding:20px;background:rgba(15,23,42,0.6);border-radius:12px;border:1px solid rgba(148,163,184,0.1)">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+                <div>
+                  <div style="font-size:12px;color:#94a3b8;margin-bottom:4px">Người đặt</div>
+                  <div style="font-size:16px;font-weight:600">${res.player_name}</div>
+                </div>
+                <div>
+                  <div style="font-size:12px;color:#94a3b8;margin-bottom:4px">Sân</div>
+                  <div style="font-size:16px;font-weight:600">${res.court_name}</div>
+                </div>
+                <div>
+                  <div style="font-size:12px;color:#94a3b8;margin-bottom:4px">Thời gian</div>
+                  <div style="font-size:14px">${res.start_time.slice(11, 16)} - ${res.end_time.slice(11, 16)}</div>
+                  <div style="font-size:12px;color:#64748b">${res.start_time.slice(0, 10)}</div>
+                </div>
+                <div>
+                  <div style="font-size:12px;color:#94a3b8;margin-bottom:4px">Tổng tiền</div>
+                  <div style="font-size:20px;color:#10b981;font-weight:700">${formatCurrency(res.price_cents)}</div>
+                </div>
+              </div>
+            </div>
+          `);
           formCard.append(info);
 
           const form = $('<div class="form-group"></div>');
-          // Payment Method
-          form.append('<label style="display:block;margin-bottom:8px;font-weight:600">Phương thức thanh toán</label>');
-          const methodSel = $('<select id="pay_method" style="width:100%;margin-bottom:16px"><option value="cash">Tiền mặt</option><option value="transfer">Chuyển khoản</option><option value="card">Thẻ</option></select>');
-          if (isUpdate && existingPayment) methodSel.val(existingPayment.payment_method);
-          form.append(methodSel);
+          
+          // Amount (editable if needed)
+          form.append(`
+            <div style="margin-bottom:20px">
+              <label style="display:block;margin-bottom:8px;font-weight:600;font-size:14px">Số tiền thanh toán (VND)</label>
+              <input type="number" id="pay_amount" value="${res.price_cents / 100}" min="0" step="1000" 
+                style="width:100%;padding:12px;font-size:16px;font-weight:600;color:#10b981" 
+                placeholder="Nhập số tiền...">
+              <small style="color:#64748b;font-size:12px">Có thể điều chỉnh nếu thanh toán một phần</small>
+            </div>
+          `);
 
-          // Note
-          form.append('<label style="display:block;margin-bottom:8px;font-weight:600">Ghi chú</label>');
-          const noteInput = $('<textarea id="pay_note" rows="3" style="width:100%;margin-bottom:20px" placeholder="Nhập ghi chú nếu có..."></textarea>');
-          if (isUpdate && existingPayment) noteInput.val(existingPayment.note || '');
-          form.append(noteInput);
+          // Payment Method with Icons
+          form.append(`
+            <div style="margin-bottom:24px">
+              <label style="display:block;margin-bottom:12px;font-weight:600;font-size:14px">Phương thức thanh toán</label>
+              <div id="payment_methods" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+                <div class="payment-method-option" data-method="cash" style="padding:16px;border:2px solid rgba(148,163,184,0.2);border-radius:12px;text-align:center;cursor:pointer;transition:all 0.2s">
+                  <div style="font-size:32px;margin-bottom:8px">💵</div>
+                  <div style="font-weight:600">Tiền mặt</div>
+                </div>
+                <div class="payment-method-option" data-method="transfer" style="padding:16px;border:2px solid rgba(148,163,184,0.2);border-radius:12px;text-align:center;cursor:pointer;transition:all 0.2s">
+                  <div style="font-size:32px;margin-bottom:8px">🏦</div>
+                  <div style="font-weight:600">Chuyển khoản</div>
+                </div>
+                <div class="payment-method-option" data-method="card" style="padding:16px;border:2px solid rgba(148,163,184,0.2);border-radius:12px;text-align:center;cursor:pointer;transition:all 0.2s">
+                  <div style="font-size:32px;margin-bottom:8px">💳</div>
+                  <div style="font-weight:600">Thẻ</div>
+                </div>
+              </div>
+            </div>
+          `);
+
+          formCard.append(form);
+
+          // Payment method selection logic
+          let selectedMethod = existingPayment ? existingPayment.method : 'cash';
+          setTimeout(() => {
+            $(`.payment-method-option[data-method="${selectedMethod}"]`).css({
+              'border-color': '#10b981',
+              'background': 'rgba(16,185,129,0.1)',
+              'transform': 'scale(1.05)'
+            });
+            
+            $('.payment-method-option').on('click', function() {
+              $('.payment-method-option').css({
+                'border-color': 'rgba(148,163,184,0.2)',
+                'background': 'transparent',
+                'transform': 'scale(1)'
+              });
+              $(this).css({
+                'border-color': '#10b981',
+                'background': 'rgba(16,185,129,0.1)',
+                'transform': 'scale(1.05)'
+              });
+              selectedMethod = $(this).data('method');
+            });
+          }, 100);
 
           // Buttons
-          const btnGroup = $('<div style="display:flex;gap:10px;justify-content:flex-end"></div>');
-          const cancelBtn = $('<button class="btn">Hủy</button>').on('click', () => {
-            this.load(); // Reload to show list
+          const btnGroup = $('<div style="display:flex;gap:12px;justify-content:flex-end;margin-top:24px"></div>');
+          const cancelBtn = $('<button class="btn" style="min-width:120px">Hủy</button>').on('click', () => {
+            this.load();
           });
-          const confirmBtn = $(`<button class="btn primary">${btnLabel}</button>`).on('click', async () => {
-            const method = $('#pay_method').val();
-            const note = $('#pay_note').val();
+          const confirmBtn = $(`<button class="btn primary" style="min-width:120px">${isUpdate ? 'Cập nhật' : '💰 Xác nhận'}</button>`).on('click', async () => {
+            const amount = parseFloat($('#pay_amount').val());
+            
+            // Validation
+            if (!amount || amount <= 0) {
+              showToast('Vui lòng nhập số tiền hợp lệ!', 'error');
+              return;
+            }
+            
+            if (!selectedMethod) {
+              showToast('Vui lòng chọn phương thức thanh toán!', 'error');
+              return;
+            }
+
+            const amountCents = Math.round(amount * 100);
 
             try {
               if (isUpdate) {
                 await api.payments.patch(existingPayment.id, {
-                  payment_method: method,
-                  note: note,
-                  status: 'completed' // ensure it's marked completed
+                  method: selectedMethod,
+                  amount_cents: amountCents,
+                  status: 'succeeded'
                 });
                 showToast('Cập nhật thanh toán thành công!', 'success');
               } else {
                 await api.payments.create({
-                  reservation_id: res.id,
-                  amount_cents: res.price_cents,
-                  payment_method: method,
-                  payment_date: new Date().toISOString().slice(0, 19).replace('T', ' '),
-                  status: 'completed',
+                  player_id: res.player_id,
+                  amount_cents: amountCents,
+                  currency: 'VND',
                   source_type: 'reservation',
-                  note: note
+                  source_id: res.id,
+                  method: selectedMethod,
+                  status: 'succeeded'
                 });
-                showToast('Thanh toán thành công!', 'success');
+                showToast(`✅ Thanh toán thành công ${formatCurrency(amountCents)}!`, 'success');
               }
+              
+              // Reload reservations to update payment status
+              if (modules.reservations && modules.reservations.load) {
+                await modules.reservations.load();
+              }
+              
               this.load(); // Return to list view
             } catch (err) {
-              showToast(err.responseJSON ? err.responseJSON.error : err.statusText, 'error');
+              showToast(err.responseJSON ? err.responseJSON.error : 'Lỗi khi xử lý thanh toán', 'error');
             }
           });
 
           btnGroup.append(cancelBtn, confirmBtn);
-          formCard.append(form, btnGroup);
+          formCard.append(btnGroup);
 
           container.empty().append(formCard);
           return;
@@ -1055,25 +1070,46 @@
 
         const toolbar = $('<div class="toolbar"></div>');
         const refreshBtn = $('<button class="btn">Tải lại</button>').on('click', () => this.load());
-        // Add manual payment button (generic)
-        const addBtn = $('<button class="btn primary">Tạo thanh toán</button>').on('click', () => {
-          openDrawer('Tạo thanh toán', null, 'payments');
-        });
 
-        toolbar.append(refreshBtn, addBtn);
+        toolbar.append(refreshBtn);
         const tableContainer = $('<div></div>');
 
-        // Enrich data with reservation info if possible (would need join or lookup, for now just raw data)
+        // Format display data
+        const displayData = this.data.map(row => {
+          // Create order code display with tooltip if it's a reservation payment
+          let orderCodeDisplay = row.order_code || '-';
+          if (row.order_code && row.source_type === 'reservation') {
+            // Add tooltip with reservation details
+            const tooltipContent = `
+              <strong>Chi tiết đơn đặt:</strong><br/>
+              Sân: ${row.court_name || 'N/A'}<br/>
+              Người đặt: ${row.player_name}<br/>
+              Thời gian: ${row.start_time ? row.start_time.slice(0, 16).replace('T', ' ') : 'N/A'}
+            `;
+            orderCodeDisplay = `<span data-tooltip-html="${tooltipContent.replace(/"/g, '&quot;')}" style="font-family:monospace;font-weight:600;color:#10b981;cursor:help">${row.order_code}</span>`;
+          } else if (!row.order_code && row.source_type === 'membership') {
+            orderCodeDisplay = `<span style="color:#6b7280">Membership</span>`;
+          }
+
+          return {
+            ...row,
+            order_code_display: orderCodeDisplay,
+            amount_formatted: formatCurrency(row.amount_cents),
+            method_label: row.method === 'transfer' ? 'Chuyển khoản' : (row.method === 'card' ? 'Thẻ' : 'Tiền mặt'),
+            created_at_formatted: row.created_at ? row.created_at.slice(0, 16).replace('T', ' ') : ''
+          };
+        });
+
         renderTable(tableContainer,
           [
             { key: 'id', label: 'ID' },
-            { key: 'reservation_id', label: 'Ref ID' },
-            { key: 'amount_cents', label: 'Số tiền' },
-            { key: 'payment_method', label: 'Phương thức' },
-            { key: 'payment_date', label: 'Ngày' },
-            { key: 'status', label: 'Trạng thái' }
+            { key: 'order_code_display', label: 'MÃ ĐƠN' },
+            { key: 'amount_formatted', label: 'SỐ TIỀN' },
+            { key: 'method_label', label: 'PHƯƠNG THỨC' },
+            { key: 'created_at_formatted', label: 'NGÀY' },
+            { key: 'status', label: 'TRẠNG THÁI' }
           ],
-          data,
+          displayData,
           { actions: true, onEdit: true, onDelete: true }
         );
 
