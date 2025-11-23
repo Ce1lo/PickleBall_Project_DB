@@ -254,6 +254,8 @@ async function init() {
       const eventStart = `${dateStr} ${String(startHour).padStart(2, '0')}:00`;
       const eventEnd = `${dateStr} ${String(endHour).padStart(2, '0')}:00`;
       
+      const eventFee = [0, 50000, 100000, 150000][Math.floor(Math.random() * 4)];
+      
       const eventRes = await run('INSERT INTO events (name, description, court_id, start_time, end_time, max_participants, fee_cents, status) VALUES (?,?,?,?,?,?,?,?)', [
         eventForDate.name,
         `Sự kiện ${eventForDate.name}`,
@@ -261,7 +263,7 @@ async function init() {
         eventStart,
         eventEnd,
         Math.floor(Math.random() * 8) + 8, // 8-16 người
-        [0, 50000, 100000, 150000][Math.floor(Math.random() * 4)],
+        eventFee,
         'open'
       ]);
 
@@ -270,8 +272,15 @@ async function init() {
       for (let r = 0; r < numRegs; r++) {
         const regPlayerId = Math.floor(Math.random() * 10) + 1;
         const regPaid = Math.random() < 0.5 ? 'paid' : 'unpaid';
-        await run('INSERT INTO event_registrations (event_id, player_id, payment_status, status) VALUES (?, ?, ?, "registered")',
+        const regRes = await run('INSERT INTO event_registrations (event_id, player_id, payment_status, status) VALUES (?, ?, ?, "registered")',
           [eventRes.insertId, regPlayerId, regPaid]);
+        
+        if (regPaid === 'paid' && eventFee > 0) {
+             const methods = ['cash', 'card', 'transfer'];
+             const method = methods[Math.floor(Math.random() * methods.length)];
+             await run('INSERT INTO payments (player_id, amount_cents, currency, source_type, source_id, method, status) VALUES (?, ?, ?, ?, ?, ?, ?)',
+               [regPlayerId, eventFee, 'VND', 'event_registration', regRes.insertId, method, 'succeeded']);
+        }
       }
 
       // Mark slots as used if court is assigned

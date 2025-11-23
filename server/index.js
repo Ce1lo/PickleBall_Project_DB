@@ -1,8 +1,8 @@
-import express from 'express';
-import mysql from 'mysql2/promise';
-import cors from 'cors';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import express from "express";
+import mysql from "mysql2/promise";
+import cors from "cors";
+import path from "path";
+import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -13,21 +13,21 @@ app.use(express.json());
 app.use(cors());
 
 // Serve static files from the public directory
-app.use(express.static(path.join(__dirname, '../public')));
+app.use(express.static(path.join(__dirname, "../public")));
 
 // MySQL connection pool
 // The pool configuration reads from the environment if available.
 const pool = mysql.createPool({
-  host: process.env.MYSQL_HOST || 'localhost',
+  host: process.env.MYSQL_HOST || "localhost",
   port: process.env.MYSQL_PORT ? parseInt(process.env.MYSQL_PORT, 10) : 3306,
-  user: process.env.MYSQL_USER || 'root',
-  password: process.env.MYSQL_PASSWORD || '27596',
-  database: process.env.MYSQL_DATABASE || 'pickleball',
+  user: process.env.MYSQL_USER || "root",
+  password: process.env.MYSQL_PASSWORD || "27596",
+  database: process.env.MYSQL_DATABASE || "pickleball",
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
-  timezone: '+07:00', // Set timezone to GMT+7 (Vietnam/Bangkok)
-  dateStrings: true // Return dates as strings to avoid UTC conversion
+  timezone: "+07:00", // Set timezone to GMT+7 (Vietnam/Bangkok)
+  dateStrings: true, // Return dates as strings to avoid UTC conversion
 });
 
 async function runAsync(sql, params = []) {
@@ -48,27 +48,35 @@ async function allAsync(sql, params = []) {
 */
 
 // Players
-app.get('/api/players', async (req, res) => {
+app.get("/api/players", async (req, res) => {
   try {
-    const rows = await allAsync('SELECT id, name, phone, email, status, expiry FROM players ORDER BY id');
+    const rows = await allAsync(
+      "SELECT id, name, phone, email, status, expiry FROM players ORDER BY id"
+    );
     res.json(rows);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-app.post('/api/players', async (req, res) => {
+app.post("/api/players", async (req, res) => {
   const { name, phone, email, status, expiry } = req.body;
   try {
-    const result = await runAsync('INSERT INTO players (name, phone, email, status, expiry) VALUES (?,?,?,?,?)', [name, phone, email, status || 'none', expiry || null]);
-    const row = await getAsync('SELECT id, name, phone, email, status, expiry FROM players WHERE id = ?', [result.lastID]);
+    const result = await runAsync(
+      "INSERT INTO players (name, phone, email, status, expiry) VALUES (?,?,?,?,?)",
+      [name, phone, email, status || "none", expiry || null]
+    );
+    const row = await getAsync(
+      "SELECT id, name, phone, email, status, expiry FROM players WHERE id = ?",
+      [result.lastID]
+    );
     res.status(201).json(row);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-app.patch('/api/players/:id', async (req, res) => {
+app.patch("/api/players/:id", async (req, res) => {
   const id = parseInt(req.params.id, 10);
   const fields = req.body;
   const setClauses = [];
@@ -78,20 +86,23 @@ app.patch('/api/players/:id', async (req, res) => {
     values.push(fields[key]);
   });
   values.push(id);
-  const sql = `UPDATE players SET ${setClauses.join(', ')} WHERE id = ?`;
+  const sql = `UPDATE players SET ${setClauses.join(", ")} WHERE id = ?`;
   try {
     await runAsync(sql, values);
-    const updated = await getAsync('SELECT id, name, phone, email, status, expiry FROM players WHERE id = ?', [id]);
+    const updated = await getAsync(
+      "SELECT id, name, phone, email, status, expiry FROM players WHERE id = ?",
+      [id]
+    );
     res.json(updated);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-app.delete('/api/players/:id', async (req, res) => {
+app.delete("/api/players/:id", async (req, res) => {
   const id = parseInt(req.params.id, 10);
   try {
-    await runAsync('DELETE FROM players WHERE id = ?', [id]);
+    await runAsync("DELETE FROM players WHERE id = ?", [id]);
     res.json({ ok: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -99,27 +110,42 @@ app.delete('/api/players/:id', async (req, res) => {
 });
 
 // Courts
-app.get('/api/courts', async (req, res) => {
+app.get("/api/courts", async (req, res) => {
   try {
-    const rows = await allAsync('SELECT id, name, location, surface, indoor, lights, is_active FROM courts ORDER BY id');
+    const rows = await allAsync(
+      "SELECT id, name, location, surface, indoor, lights, is_active FROM courts ORDER BY id"
+    );
     res.json(rows);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-app.post('/api/courts', async (req, res) => {
+app.post("/api/courts", async (req, res) => {
   const { name, location, surface, indoor, lights, is_active } = req.body;
   try {
-    const result = await runAsync('INSERT INTO courts (name, location, surface, indoor, lights, is_active) VALUES (?,?,?,?,?,?)', [name, location, surface, indoor ? 1 : 0, lights ? 1 : 0, is_active ? 1 : 0]);
-    const row = await getAsync('SELECT id, name, location, surface, indoor, lights, is_active FROM courts WHERE id = ?', [result.lastID]);
+    const result = await runAsync(
+      "INSERT INTO courts (name, location, surface, indoor, lights, is_active) VALUES (?,?,?,?,?,?)",
+      [
+        name,
+        location,
+        surface,
+        indoor ? 1 : 0,
+        lights ? 1 : 0,
+        is_active ? 1 : 0,
+      ]
+    );
+    const row = await getAsync(
+      "SELECT id, name, location, surface, indoor, lights, is_active FROM courts WHERE id = ?",
+      [result.lastID]
+    );
     res.status(201).json(row);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-app.patch('/api/courts/:id', async (req, res) => {
+app.patch("/api/courts/:id", async (req, res) => {
   const id = parseInt(req.params.id, 10);
   const fields = req.body;
   const setClauses = [];
@@ -130,18 +156,24 @@ app.patch('/api/courts/:id', async (req, res) => {
   }
   values.push(id);
   try {
-    await runAsync(`UPDATE courts SET ${setClauses.join(', ')} WHERE id = ?`, values);
-    const updated = await getAsync('SELECT id, name, location, surface, indoor, lights, is_active FROM courts WHERE id = ?', [id]);
+    await runAsync(
+      `UPDATE courts SET ${setClauses.join(", ")} WHERE id = ?`,
+      values
+    );
+    const updated = await getAsync(
+      "SELECT id, name, location, surface, indoor, lights, is_active FROM courts WHERE id = ?",
+      [id]
+    );
     res.json(updated);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-app.delete('/api/courts/:id', async (req, res) => {
+app.delete("/api/courts/:id", async (req, res) => {
   const id = parseInt(req.params.id, 10);
   try {
-    await runAsync('DELETE FROM courts WHERE id = ?', [id]);
+    await runAsync("DELETE FROM courts WHERE id = ?", [id]);
     res.json({ ok: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -149,7 +181,7 @@ app.delete('/api/courts/:id', async (req, res) => {
 });
 
 // Reservations
-app.get('/api/reservations', async (req, res) => {
+app.get("/api/reservations", async (req, res) => {
   const { date } = req.query;
   try {
     let rows;
@@ -178,8 +210,16 @@ app.get('/api/reservations', async (req, res) => {
   }
 });
 
-app.post('/api/reservations', async (req, res) => {
-  const { court_id, player_id, start_time, end_time, price_cents, status, payment_status } = req.body;
+app.post("/api/reservations", async (req, res) => {
+  const {
+    court_id,
+    player_id,
+    start_time,
+    end_time,
+    price_cents,
+    status,
+    payment_status,
+  } = req.body;
   // check for conflicts: if existing reservation for same court overlaps
   try {
     const conflicts = await allAsync(
@@ -200,7 +240,9 @@ app.post('/api/reservations', async (req, res) => {
     );
 
     if (eventConflicts.length > 0) {
-      return res.status(409).json({ error: 'Court is blocked by an event at this time.' });
+      return res
+        .status(409)
+        .json({ error: "Court is blocked by an event at this time." });
     }
 
     if (conflicts.length > 0) {
@@ -209,17 +251,32 @@ app.post('/api/reservations', async (req, res) => {
         'INSERT INTO waitlist (court_id, player_id, start_time, end_time, priority, status) VALUES (?,?,?,?,0, "waiting")',
         [court_id, player_id, start_time, end_time]
       );
-      return res.status(409).json({ error: 'Court is already booked at this time. Added to waitlist.' });
+      return res
+        .status(409)
+        .json({
+          error: "Court is already booked at this time. Added to waitlist.",
+        });
     }
     const result = await runAsync(
-      'INSERT INTO reservations (court_id, player_id, start_time, end_time, status, price_cents, payment_status) VALUES (?,?,?,?,?,?,?)',
-      [court_id, player_id, start_time, end_time, status || 'booked', price_cents || 0, payment_status || 'unpaid']
+      "INSERT INTO reservations (court_id, player_id, start_time, end_time, status, price_cents, payment_status) VALUES (?,?,?,?,?,?,?)",
+      [
+        court_id,
+        player_id,
+        start_time,
+        end_time,
+        status || "booked",
+        price_cents || 0,
+        payment_status || "unpaid",
+      ]
     );
-    
+
     // Generate and update order_code
-    const orderCode = '#' + String(result.lastID).padStart(6, '0');
-    await runAsync('UPDATE reservations SET order_code = ? WHERE id = ?', [orderCode, result.lastID]);
-    
+    const orderCode = "#" + String(result.lastID).padStart(6, "0");
+    await runAsync("UPDATE reservations SET order_code = ? WHERE id = ?", [
+      orderCode,
+      result.lastID,
+    ]);
+
     const row = await getAsync(
       `SELECT r.id, r.order_code, r.court_id, c.name AS court_name, r.player_id, p.name AS player_name, r.start_time, r.end_time, r.status, r.price_cents, r.payment_status
        FROM reservations r
@@ -234,7 +291,7 @@ app.post('/api/reservations', async (req, res) => {
   }
 });
 
-app.patch('/api/reservations/:id', async (req, res) => {
+app.patch("/api/reservations/:id", async (req, res) => {
   const id = parseInt(req.params.id, 10);
   const fields = req.body;
   const setClauses = [];
@@ -245,7 +302,10 @@ app.patch('/api/reservations/:id', async (req, res) => {
   }
   values.push(id);
   try {
-    await runAsync(`UPDATE reservations SET ${setClauses.join(', ')} WHERE id = ?`, values);
+    await runAsync(
+      `UPDATE reservations SET ${setClauses.join(", ")} WHERE id = ?`,
+      values
+    );
     const updated = await getAsync(
       `SELECT r.id, r.court_id, c.name AS court_name, r.player_id, p.name AS player_name, r.start_time, r.end_time, r.status, r.price_cents, r.payment_status
        FROM reservations r
@@ -260,21 +320,21 @@ app.patch('/api/reservations/:id', async (req, res) => {
   }
 });
 
-app.delete('/api/reservations/:id', async (req, res) => {
+app.delete("/api/reservations/:id", async (req, res) => {
   const id = parseInt(req.params.id, 10);
   try {
     // Get the reservation details before deleting
     const reservation = await getAsync(
-      'SELECT court_id, start_time, end_time FROM reservations WHERE id = ?',
+      "SELECT court_id, start_time, end_time FROM reservations WHERE id = ?",
       [id]
     );
 
     if (!reservation) {
-      return res.status(404).json({ error: 'Reservation not found' });
+      return res.status(404).json({ error: "Reservation not found" });
     }
 
     // Delete the reservation
-    await runAsync('DELETE FROM reservations WHERE id = ?', [id]);
+    await runAsync("DELETE FROM reservations WHERE id = ?", [id]);
 
     // Check if there are any waitlist entries for the same court and overlapping time
     const waitlistEntries = await allAsync(
@@ -294,12 +354,20 @@ app.delete('/api/reservations/:id', async (req, res) => {
 
       // Create new reservation from waitlist
       await runAsync(
-        'INSERT INTO reservations (court_id, player_id, start_time, end_time, status, price_cents, payment_status) VALUES (?,?,?,?,?,?,?)',
-        [waitlistEntry.court_id, waitlistEntry.player_id, waitlistEntry.start_time, waitlistEntry.end_time, 'booked', 0, 'unpaid']
+        "INSERT INTO reservations (court_id, player_id, start_time, end_time, status, price_cents, payment_status) VALUES (?,?,?,?,?,?,?)",
+        [
+          waitlistEntry.court_id,
+          waitlistEntry.player_id,
+          waitlistEntry.start_time,
+          waitlistEntry.end_time,
+          "booked",
+          0,
+          "unpaid",
+        ]
       );
 
       // Remove from waitlist
-      await runAsync('DELETE FROM waitlist WHERE id = ?', [waitlistEntry.id]);
+      await runAsync("DELETE FROM waitlist WHERE id = ?", [waitlistEntry.id]);
     }
 
     res.json({ ok: true, waitlistPromoted: waitlistEntries.length > 0 });
@@ -309,26 +377,35 @@ app.delete('/api/reservations/:id', async (req, res) => {
 });
 
 // Waitlist
-app.get('/api/waitlist', async (req, res) => {
+app.get("/api/waitlist", async (req, res) => {
   try {
     const rows = await allAsync(
       `SELECT w.id, w.court_id, c.name AS court_name, w.player_id, p.name AS player_name, w.start_time, w.end_time, w.priority, w.status
        FROM waitlist w
        JOIN courts c ON c.id = w.court_id
        JOIN players p ON p.id = w.player_id
-       ORDER BY w.created_at`);
+       ORDER BY w.created_at`
+    );
     res.json(rows);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-app.post('/api/waitlist', async (req, res) => {
-  const { court_id, player_id, start_time, end_time, priority, status } = req.body;
+app.post("/api/waitlist", async (req, res) => {
+  const { court_id, player_id, start_time, end_time, priority, status } =
+    req.body;
   try {
     const result = await runAsync(
-      'INSERT INTO waitlist (court_id, player_id, start_time, end_time, priority, status) VALUES (?,?,?,?,?,?)',
-      [court_id, player_id, start_time, end_time, priority || 0, status || 'waiting']
+      "INSERT INTO waitlist (court_id, player_id, start_time, end_time, priority, status) VALUES (?,?,?,?,?,?)",
+      [
+        court_id,
+        player_id,
+        start_time,
+        end_time,
+        priority || 0,
+        status || "waiting",
+      ]
     );
     const row = await getAsync(
       `SELECT w.id, w.court_id, c.name AS court_name, w.player_id, p.name AS player_name, w.start_time, w.end_time, w.priority, w.status
@@ -344,7 +421,7 @@ app.post('/api/waitlist', async (req, res) => {
   }
 });
 
-app.patch('/api/waitlist/:id', async (req, res) => {
+app.patch("/api/waitlist/:id", async (req, res) => {
   const id = parseInt(req.params.id, 10);
   const fields = req.body;
   const setClauses = [];
@@ -355,7 +432,10 @@ app.patch('/api/waitlist/:id', async (req, res) => {
   }
   values.push(id);
   try {
-    await runAsync(`UPDATE waitlist SET ${setClauses.join(', ')} WHERE id = ?`, values);
+    await runAsync(
+      `UPDATE waitlist SET ${setClauses.join(", ")} WHERE id = ?`,
+      values
+    );
     // fetch updated waitlist entry
     const updated = await getAsync(
       `SELECT w.id, w.court_id, c.name AS court_name, w.player_id, p.name AS player_name, w.start_time, w.end_time, w.priority, w.status
@@ -377,11 +457,11 @@ app.patch('/api/waitlist/:id', async (req, res) => {
     if (conflicts.length === 0) {
       // Create a new reservation with default status 'booked' and price 0
       const result = await runAsync(
-        'INSERT INTO reservations (court_id, player_id, start_time, end_time, status, price_cents) VALUES (?,?,?,?,?,?)',
-        [court_id, player_id, start_time, end_time, 'booked', 0]
+        "INSERT INTO reservations (court_id, player_id, start_time, end_time, status, price_cents) VALUES (?,?,?,?,?,?)",
+        [court_id, player_id, start_time, end_time, "booked", 0]
       );
       // Remove from waitlist
-      await runAsync('DELETE FROM waitlist WHERE id = ?', [id]);
+      await runAsync("DELETE FROM waitlist WHERE id = ?", [id]);
       // return the newly created reservation
       const row = await getAsync(
         `SELECT r.id, r.court_id, c.name AS court_name, r.player_id, p.name AS player_name, r.start_time, r.end_time, r.status, r.price_cents, r.payment_status
@@ -400,10 +480,10 @@ app.patch('/api/waitlist/:id', async (req, res) => {
   }
 });
 
-app.delete('/api/waitlist/:id', async (req, res) => {
+app.delete("/api/waitlist/:id", async (req, res) => {
   const id = parseInt(req.params.id, 10);
   try {
-    await runAsync('DELETE FROM waitlist WHERE id = ?', [id]);
+    await runAsync("DELETE FROM waitlist WHERE id = ?", [id]);
     res.json({ ok: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -411,7 +491,7 @@ app.delete('/api/waitlist/:id', async (req, res) => {
 });
 
 // Events
-app.get('/api/events', async (req, res) => {
+app.get("/api/events", async (req, res) => {
   try {
     const rows = await allAsync(
       `SELECT e.id, e.name, e.description, e.court_id, c.name AS court_name, e.start_time, e.end_time, e.max_participants, e.fee_cents, e.status
@@ -425,8 +505,17 @@ app.get('/api/events', async (req, res) => {
   }
 });
 
-app.post('/api/events', async (req, res) => {
-  const { name, description, court_id, start_time, end_time, max_participants, fee_cents, status } = req.body;
+app.post("/api/events", async (req, res) => {
+  const {
+    name,
+    description,
+    court_id,
+    start_time,
+    end_time,
+    max_participants,
+    fee_cents,
+    status,
+  } = req.body;
   try {
     // Check for conflicts if court is assigned
     if (court_id) {
@@ -439,7 +528,11 @@ app.post('/api/events', async (req, res) => {
         [court_id, start_time, end_time]
       );
       if (reservationConflicts.length > 0) {
-        return res.status(409).json({ error: 'Court is already booked by a reservation at this time.' });
+        return res
+          .status(409)
+          .json({
+            error: "Court is already booked by a reservation at this time.",
+          });
       }
 
       // Check for conflicts with other events
@@ -451,13 +544,26 @@ app.post('/api/events', async (req, res) => {
         [court_id, start_time, end_time]
       );
       if (eventConflicts.length > 0) {
-        return res.status(409).json({ error: 'Court is already booked by another event at this time.' });
+        return res
+          .status(409)
+          .json({
+            error: "Court is already booked by another event at this time.",
+          });
       }
     }
 
     const result = await runAsync(
-      'INSERT INTO events (name, description, court_id, start_time, end_time, max_participants, fee_cents, status) VALUES (?,?,?,?,?,?,?,?)',
-      [name, description, court_id || null, start_time, end_time, max_participants || null, fee_cents || 0, status || 'open']
+      "INSERT INTO events (name, description, court_id, start_time, end_time, max_participants, fee_cents, status) VALUES (?,?,?,?,?,?,?,?)",
+      [
+        name,
+        description || null,
+        court_id || null,
+        start_time,
+        end_time,
+        max_participants || null,
+        fee_cents || 0,
+        status || "open",
+      ]
     );
     const row = await getAsync(
       `SELECT e.id, e.name, e.description, e.court_id, c.name AS court_name, e.start_time, e.end_time, e.max_participants, e.fee_cents, e.status
@@ -472,7 +578,7 @@ app.post('/api/events', async (req, res) => {
   }
 });
 
-app.patch('/api/events/:id', async (req, res) => {
+app.patch("/api/events/:id", async (req, res) => {
   const id = parseInt(req.params.id, 10);
   const fields = req.body;
   const setClauses = [];
@@ -483,7 +589,10 @@ app.patch('/api/events/:id', async (req, res) => {
   }
   values.push(id);
   try {
-    await runAsync(`UPDATE events SET ${setClauses.join(', ')} WHERE id = ?`, values);
+    await runAsync(
+      `UPDATE events SET ${setClauses.join(", ")} WHERE id = ?`,
+      values
+    );
     const updated = await getAsync(
       `SELECT e.id, e.name, e.description, e.court_id, c.name AS court_name, e.start_time, e.end_time, e.max_participants, e.fee_cents, e.status
        FROM events e
@@ -497,11 +606,11 @@ app.patch('/api/events/:id', async (req, res) => {
   }
 });
 
-app.delete('/api/events/:id', async (req, res) => {
+app.delete("/api/events/:id", async (req, res) => {
   const id = parseInt(req.params.id, 10);
   try {
-    await runAsync('DELETE FROM event_registrations WHERE event_id = ?', [id]);
-    await runAsync('DELETE FROM events WHERE id = ?', [id]);
+    await runAsync("DELETE FROM event_registrations WHERE event_id = ?", [id]);
+    await runAsync("DELETE FROM events WHERE id = ?", [id]);
     res.json({ ok: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -509,7 +618,7 @@ app.delete('/api/events/:id', async (req, res) => {
 });
 
 // Event registrations
-app.get('/api/events/:eventId/registrations', async (req, res) => {
+app.get("/api/events/:eventId/registrations", async (req, res) => {
   const eventId = parseInt(req.params.eventId, 10);
   try {
     const rows = await allAsync(
@@ -526,13 +635,13 @@ app.get('/api/events/:eventId/registrations', async (req, res) => {
   }
 });
 
-app.post('/api/events/:eventId/registrations', async (req, res) => {
+app.post("/api/events/:eventId/registrations", async (req, res) => {
   const eventId = parseInt(req.params.eventId, 10);
   const { player_id, payment_status, status } = req.body;
   try {
     const result = await runAsync(
-      'INSERT INTO event_registrations (event_id, player_id, payment_status, status) VALUES (?,?,?,?)',
-      [eventId, player_id, payment_status || 'unpaid', status || 'registered']
+      "INSERT INTO event_registrations (event_id, player_id, payment_status, status) VALUES (?,?,?,?)",
+      [eventId, player_id, payment_status || "unpaid", status || "registered"]
     );
     const row = await getAsync(
       `SELECT er.id, er.event_id, er.player_id, p.name AS player_name, er.registered_at, er.payment_status, er.status
@@ -547,7 +656,7 @@ app.post('/api/events/:eventId/registrations', async (req, res) => {
   }
 });
 
-app.patch('/api/event-registrations/:id', async (req, res) => {
+app.patch("/api/event-registrations/:id", async (req, res) => {
   const id = parseInt(req.params.id, 10);
   const fields = req.body;
   const setClauses = [];
@@ -558,7 +667,10 @@ app.patch('/api/event-registrations/:id', async (req, res) => {
   }
   values.push(id);
   try {
-    await runAsync(`UPDATE event_registrations SET ${setClauses.join(', ')} WHERE id = ?`, values);
+    await runAsync(
+      `UPDATE event_registrations SET ${setClauses.join(", ")} WHERE id = ?`,
+      values
+    );
     const row = await getAsync(
       `SELECT er.id, er.event_id, er.player_id, p.name AS player_name, er.registered_at, er.payment_status, er.status
        FROM event_registrations er
@@ -572,10 +684,10 @@ app.patch('/api/event-registrations/:id', async (req, res) => {
   }
 });
 
-app.delete('/api/event-registrations/:id', async (req, res) => {
+app.delete("/api/event-registrations/:id", async (req, res) => {
   const id = parseInt(req.params.id, 10);
   try {
-    await runAsync('DELETE FROM event_registrations WHERE id = ?', [id]);
+    await runAsync("DELETE FROM event_registrations WHERE id = ?", [id]);
     res.json({ ok: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -583,19 +695,19 @@ app.delete('/api/event-registrations/:id', async (req, res) => {
 });
 
 // Membership plans
-app.get('/api/membership-plans', async (req, res) => {
+app.get("/api/membership-plans", async (req, res) => {
   try {
-    const rows = await allAsync('SELECT id, name, period_months, price_cents, description FROM membership_plans');
+    const rows = await allAsync(
+      "SELECT id, name, period_months, price_cents, description FROM membership_plans"
+    );
     res.json(rows);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-
-
 // Notifications
-app.get('/api/notifications-queue', async (req, res) => {
+app.get("/api/notifications-queue", async (req, res) => {
   try {
     const rows = await allAsync(
       `SELECT n.id, n.player_id, p.name AS player_name, n.channel, n.subject, n.body, n.scheduled_at, n.sent_at, n.status
@@ -609,12 +721,19 @@ app.get('/api/notifications-queue', async (req, res) => {
   }
 });
 
-app.post('/api/notifications-queue', async (req, res) => {
+app.post("/api/notifications-queue", async (req, res) => {
   const { player_id, channel, subject, body, scheduled_at, status } = req.body;
   try {
     const result = await runAsync(
-      'INSERT INTO notifications (player_id, channel, subject, body, scheduled_at, status) VALUES (?,?,?,?,?,?)',
-      [player_id || null, channel, subject, body, scheduled_at, status || 'queued']
+      "INSERT INTO notifications (player_id, channel, subject, body, scheduled_at, status) VALUES (?,?,?,?,?,?)",
+      [
+        player_id || null,
+        channel,
+        subject,
+        body,
+        scheduled_at,
+        status || "queued",
+      ]
     );
     const row = await getAsync(
       `SELECT n.id, n.player_id, p.name AS player_name, n.channel, n.subject, n.body, n.scheduled_at, n.sent_at, n.status
@@ -629,7 +748,7 @@ app.post('/api/notifications-queue', async (req, res) => {
   }
 });
 
-app.patch('/api/notifications-queue/:id', async (req, res) => {
+app.patch("/api/notifications-queue/:id", async (req, res) => {
   const id = parseInt(req.params.id, 10);
   const fields = req.body;
   const setClauses = [];
@@ -640,7 +759,10 @@ app.patch('/api/notifications-queue/:id', async (req, res) => {
   });
   values.push(id);
   try {
-    await runAsync(`UPDATE notifications SET ${setClauses.join(', ')} WHERE id = ?`, values);
+    await runAsync(
+      `UPDATE notifications SET ${setClauses.join(", ")} WHERE id = ?`,
+      values
+    );
     const row = await getAsync(
       `SELECT n.id, n.player_id, p.name AS player_name, n.channel, n.subject, n.body, n.scheduled_at, n.sent_at, n.status
        FROM notifications n
@@ -654,10 +776,10 @@ app.patch('/api/notifications-queue/:id', async (req, res) => {
   }
 });
 
-app.delete('/api/notifications-queue/:id', async (req, res) => {
+app.delete("/api/notifications-queue/:id", async (req, res) => {
   const id = parseInt(req.params.id, 10);
   try {
-    await runAsync('DELETE FROM notifications WHERE id = ?', [id]);
+    await runAsync("DELETE FROM notifications WHERE id = ?", [id]);
     res.json({ ok: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -665,16 +787,19 @@ app.delete('/api/notifications-queue/:id', async (req, res) => {
 });
 
 // Payments
-app.get('/api/payments', async (req, res) => {
+app.get("/api/payments", async (req, res) => {
   try {
     const rows = await allAsync(
       `SELECT pay.id, pay.player_id, p.name AS player_name, pay.amount_cents, pay.currency, 
               pay.source_type, pay.source_id, pay.method, pay.status, pay.created_at,
-              r.order_code, r.start_time, c.name AS court_name
+              r.order_code, r.start_time AS res_start_time, c.name AS court_name,
+              e.name AS event_name, e.start_time AS event_start_time
        FROM payments pay
        JOIN players p ON p.id = pay.player_id
        LEFT JOIN reservations r ON pay.source_type = 'reservation' AND pay.source_id = r.id
        LEFT JOIN courts c ON r.court_id = c.id
+       LEFT JOIN event_registrations er ON pay.source_type = 'event_registration' AND pay.source_id = er.id
+       LEFT JOIN events e ON er.event_id = e.id
        ORDER BY pay.created_at DESC`
     );
     res.json(rows);
@@ -683,18 +808,42 @@ app.get('/api/payments', async (req, res) => {
   }
 });
 
-app.post('/api/payments', async (req, res) => {
-  const { player_id, amount_cents, currency, source_type, source_id, method, status } = req.body;
+app.post("/api/payments", async (req, res) => {
+  const {
+    player_id,
+    amount_cents,
+    currency,
+    source_type,
+    source_id,
+    method,
+    status,
+  } = req.body;
   try {
     // Create payment record
     const result = await runAsync(
-      'INSERT INTO payments (player_id, amount_cents, currency, source_type, source_id, method, status) VALUES (?,?,?,?,?,?,?)',
-      [player_id, amount_cents, currency || 'VND', source_type, source_id || null, method, status || 'succeeded']
+      "INSERT INTO payments (player_id, amount_cents, currency, source_type, source_id, method, status) VALUES (?,?,?,?,?,?,?)",
+      [
+        player_id,
+        amount_cents,
+        currency || "VND",
+        source_type,
+        source_id || null,
+        method,
+        status || "succeeded",
+      ]
     );
 
     // If payment is for a reservation and succeeded, update reservation payment_status
-    if (source_type === 'reservation' && source_id && status === 'succeeded') {
-      await runAsync('UPDATE reservations SET payment_status = ? WHERE id = ?', ['paid', source_id]);
+    if (source_type === "reservation" && source_id && status === "succeeded") {
+      await runAsync(
+        "UPDATE reservations SET payment_status = ? WHERE id = ?",
+        ["paid", source_id]
+      );
+    } else if (source_type === "event_registration" && source_id && status === "succeeded") {
+      await runAsync(
+        "UPDATE event_registrations SET payment_status = ? WHERE id = ?",
+        ["paid", source_id]
+      );
     }
 
     // Return created payment with player info
@@ -712,7 +861,7 @@ app.post('/api/payments', async (req, res) => {
   }
 });
 
-app.patch('/api/payments/:id', async (req, res) => {
+app.patch("/api/payments/:id", async (req, res) => {
   const id = parseInt(req.params.id, 10);
   const fields = req.body;
   const setClauses = [];
@@ -723,7 +872,10 @@ app.patch('/api/payments/:id', async (req, res) => {
   }
   values.push(id);
   try {
-    await runAsync(`UPDATE payments SET ${setClauses.join(', ')} WHERE id = ?`, values);
+    await runAsync(
+      `UPDATE payments SET ${setClauses.join(", ")} WHERE id = ?`,
+      values
+    );
 
     // Fetch updated payment to check if we need to update reservation
     const row = await getAsync(
@@ -736,8 +888,11 @@ app.patch('/api/payments/:id', async (req, res) => {
     );
 
     // If payment is for a reservation, ensure reservation is marked as paid
-    if (row.source_type === 'reservation' && row.source_id) {
-      await runAsync('UPDATE reservations SET payment_status = ? WHERE id = ?', ['paid', row.source_id]);
+    if (row.source_type === "reservation" && row.source_id) {
+      await runAsync(
+        "UPDATE reservations SET payment_status = ? WHERE id = ?",
+        ["paid", row.source_id]
+      );
     }
 
     res.json(row);
@@ -746,10 +901,10 @@ app.patch('/api/payments/:id', async (req, res) => {
   }
 });
 
-app.delete('/api/payments/:id', async (req, res) => {
+app.delete("/api/payments/:id", async (req, res) => {
   const id = parseInt(req.params.id, 10);
   try {
-    await runAsync('DELETE FROM payments WHERE id = ?', [id]);
+    await runAsync("DELETE FROM payments WHERE id = ?", [id]);
     res.json({ ok: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -757,7 +912,7 @@ app.delete('/api/payments/:id', async (req, res) => {
 });
 
 // Messages (log)
-app.get('/api/messages', async (req, res) => {
+app.get("/api/messages", async (req, res) => {
   try {
     const rows = await allAsync(
       `SELECT m.id, m.player_id, p.name AS player_name, m.channel, m.subject, m.body, m.tags, m.sent_at, m.status
@@ -771,12 +926,19 @@ app.get('/api/messages', async (req, res) => {
   }
 });
 
-app.post('/api/messages', async (req, res) => {
+app.post("/api/messages", async (req, res) => {
   const { player_id, channel, subject, body, tags, status } = req.body;
   try {
     const result = await runAsync(
-      'INSERT INTO messages (player_id, channel, subject, body, tags, status) VALUES (?,?,?,?,?,?)',
-      [player_id || null, channel, subject, body, tags ? JSON.stringify(tags) : null, status || 'sent']
+      "INSERT INTO messages (player_id, channel, subject, body, tags, status) VALUES (?,?,?,?,?,?)",
+      [
+        player_id || null,
+        channel,
+        subject,
+        body,
+        tags ? JSON.stringify(tags) : null,
+        status || "sent",
+      ]
     );
     const row = await getAsync(
       `SELECT m.id, m.player_id, p.name AS player_name, m.channel, m.subject, m.body, m.tags, m.sent_at, m.status
@@ -794,7 +956,7 @@ app.post('/api/messages', async (req, res) => {
 // Reports
 
 // Membership report: players with expiry and days to expiry
-app.get('/api/report/membership', async (req, res) => {
+app.get("/api/report/membership", async (req, res) => {
   try {
     const rows = await allAsync(
       `SELECT p.id, p.name, p.email, p.status, p.expiry,
@@ -809,7 +971,7 @@ app.get('/api/report/membership', async (req, res) => {
 });
 
 // Reservation usage report: minutes used per court per day
-app.get('/api/report/reservations-usage', async (req, res) => {
+app.get("/api/report/reservations-usage", async (req, res) => {
   try {
     const rows = await allAsync(
       `SELECT r.court_id, c.name AS court_name, DATE(r.start_time) AS date,
@@ -828,7 +990,7 @@ app.get('/api/report/reservations-usage', async (req, res) => {
 });
 
 // Revenue report: monthly totals
-app.get('/api/report/revenue', async (req, res) => {
+app.get("/api/report/revenue", async (req, res) => {
   try {
     const rows = await allAsync(
       `SELECT DATE_FORMAT(created_at, '%Y-%m') AS month,
@@ -847,7 +1009,7 @@ app.get('/api/report/revenue', async (req, res) => {
 });
 
 // Events calendar with counts
-app.get('/api/report/events-calendar', async (req, res) => {
+app.get("/api/report/events-calendar", async (req, res) => {
   try {
     const rows = await allAsync(
       `SELECT e.id, e.name, e.start_time, e.end_time, e.max_participants, e.fee_cents, e.status,
@@ -866,7 +1028,7 @@ app.get('/api/report/events-calendar', async (req, res) => {
 });
 
 // Messages history
-app.get('/api/report/messages-history', async (req, res) => {
+app.get("/api/report/messages-history", async (req, res) => {
   try {
     const rows = await allAsync(
       `SELECT m.id, m.player_id, p.name AS player_name, m.channel, m.subject, m.sent_at, m.status, m.tags
@@ -881,7 +1043,7 @@ app.get('/api/report/messages-history', async (req, res) => {
 });
 
 // Schedule: upcoming reservations and waitlist (next 7 days)
-app.get('/api/report/schedule', async (req, res) => {
+app.get("/api/report/schedule", async (req, res) => {
   try {
     const now = new Date();
     const seven = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
@@ -912,8 +1074,8 @@ app.get('/api/report/schedule', async (req, res) => {
 });
 
 // Fallback to serve index.html for SPA-like experience
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../public/index.html'));
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../public/index.html"));
 });
 
 const PORT = process.env.PORT || 3000;
