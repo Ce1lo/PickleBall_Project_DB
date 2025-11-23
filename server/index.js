@@ -189,6 +189,20 @@ app.post('/api/reservations', async (req, res) => {
          AND NOT (end_time <= ? OR start_time >= ?)`,
       [court_id, start_time, end_time]
     );
+
+    // Check for conflicts with events
+    const eventConflicts = await allAsync(
+      `SELECT id FROM events
+       WHERE court_id = ?
+         AND status != 'cancelled'
+         AND NOT (end_time <= ? OR start_time >= ?)`,
+      [court_id, start_time, end_time]
+    );
+
+    if (eventConflicts.length > 0) {
+      return res.status(409).json({ error: 'Court is blocked by an event at this time.' });
+    }
+
     if (conflicts.length > 0) {
       // push to waitlist automatically
       await runAsync(
@@ -414,6 +428,33 @@ app.get('/api/events', async (req, res) => {
 app.post('/api/events', async (req, res) => {
   const { name, description, court_id, start_time, end_time, max_participants, fee_cents, status } = req.body;
   try {
+    // Check for conflicts if court is assigned
+    if (court_id) {
+      // Check for conflicts with reservations
+      const reservationConflicts = await allAsync(
+        `SELECT id FROM reservations
+         WHERE court_id = ?
+           AND status IN ('booked','completed')
+           AND NOT (end_time <= ? OR start_time >= ?)`,
+        [court_id, start_time, end_time]
+      );
+      if (reservationConflicts.length > 0) {
+        return res.status(409).json({ error: 'Court is already booked by a reservation at this time.' });
+      }
+
+      // Check for conflicts with other events
+      const eventConflicts = await allAsync(
+        `SELECT id FROM events
+         WHERE court_id = ?
+           AND status != 'cancelled'
+           AND NOT (end_time <= ? OR start_time >= ?)`,
+        [court_id, start_time, end_time]
+      );
+      if (eventConflicts.length > 0) {
+        return res.status(409).json({ error: 'Court is already booked by another event at this time.' });
+      }
+    }
+
     const result = await runAsync(
       'INSERT INTO events (name, description, court_id, start_time, end_time, max_participants, fee_cents, status) VALUES (?,?,?,?,?,?,?,?)',
       [name, description, court_id || null, start_time, end_time, max_participants || null, fee_cents || 0, status || 'open']

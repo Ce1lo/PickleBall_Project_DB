@@ -191,12 +191,18 @@ async function init() {
   `);
 
   // Seed some sample data
+  // Seed some sample data
   const players = [
-    ['Nguyen Van A', '0901002001', 'a@example.com', 'active', '2025-12-31'],
-    ['Tran Thi B', '0901002002', 'b@example.com', 'expired', '2024-10-15'],
-    ['Le Van C', '0901002003', 'c@example.com', 'active', '2026-01-10'],
-    ['Pham Thi D', '0901002004', 'd@example.com', 'none', null],
-    ['Hoang Van E', '0901002005', 'e@example.com', 'active', '2025-07-20']
+    ['Nguyễn Văn An', '0901234567', 'an.nguyen@example.com', 'active', '2025-12-31'],
+    ['Trần Thị Bình', '0912345678', 'binh.tran@example.com', 'expired', '2024-10-15'],
+    ['Lê Văn Cường', '0987654321', 'cuong.le@example.com', 'active', '2026-01-10'],
+    ['Phạm Thị Dung', '0934567890', 'dung.pham@example.com', 'none', null],
+    ['Hoàng Văn Em', '0965432109', 'em.hoang@example.com', 'active', '2025-07-20'],
+    ['Võ Thị Hương', '0978123456', 'huong.vo@example.com', 'active', '2025-11-30'],
+    ['Đặng Văn Giàu', '0909876543', 'giau.dang@example.com', 'none', null],
+    ['Bùi Thị Hạnh', '0918765432', 'hanh.bui@example.com', 'active', '2025-09-15'],
+    ['Ngô Văn Hùng', '0932123456', 'hung.ngo@example.com', 'expired', '2024-05-20'],
+    ['Dương Thị Lan', '0945678901', 'lan.duong@example.com', 'active', '2026-03-01']
   ];
   for (const p of players) {
     await run('INSERT INTO players (name, phone, email, status, expiry) VALUES (?,?,?,?,?)', p);
@@ -238,12 +244,50 @@ async function init() {
   while (loopDate <= endDate) {
     const dateStr = loopDate.toISOString().slice(0, 10);
     
-    // Generate 2-4 reservations per day (not per court)
-    const numReservations = Math.floor(Math.random() * 3) + 2; // 2-4
-    
     // Track used slots to avoid overlaps on same court
     const usedSlots = new Map(); // court_id -> Set of hours
 
+    // Check if this date has an event
+    const eventForDate = eventDates.find(e => e.date === dateStr);
+    if (eventForDate) {
+      const [startHour, endHour] = eventForDate.time.split('-').map(t => parseInt(t.split(':')[0]));
+      const eventStart = `${dateStr} ${String(startHour).padStart(2, '0')}:00`;
+      const eventEnd = `${dateStr} ${String(endHour).padStart(2, '0')}:00`;
+      
+      const eventRes = await run('INSERT INTO events (name, description, court_id, start_time, end_time, max_participants, fee_cents, status) VALUES (?,?,?,?,?,?,?,?)', [
+        eventForDate.name,
+        `Sự kiện ${eventForDate.name}`,
+        eventForDate.court,
+        eventStart,
+        eventEnd,
+        Math.floor(Math.random() * 8) + 8, // 8-16 người
+        [0, 50000, 100000, 150000][Math.floor(Math.random() * 4)],
+        'open'
+      ]);
+
+      // Add 2-4 random registrations for each event
+      const numRegs = Math.floor(Math.random() * 3) + 2;
+      for (let r = 0; r < numRegs; r++) {
+        const regPlayerId = Math.floor(Math.random() * 10) + 1;
+        const regPaid = Math.random() < 0.5 ? 'paid' : 'unpaid';
+        await run('INSERT INTO event_registrations (event_id, player_id, payment_status, status) VALUES (?, ?, ?, "registered")',
+          [eventRes.insertId, regPlayerId, regPaid]);
+      }
+
+      // Mark slots as used if court is assigned
+      if (eventForDate.court) {
+        if (!usedSlots.has(eventForDate.court)) {
+          usedSlots.set(eventForDate.court, new Set());
+        }
+        for (let h = startHour; h < endHour; h++) {
+          usedSlots.get(eventForDate.court).add(h);
+        }
+      }
+    }
+    
+    // Generate 2-4 reservations per day (not per court)
+    const numReservations = Math.floor(Math.random() * 3) + 2; // 2-4
+    
     for (let i = 0; i < numReservations; i++) {
       // Random court (1-5)
       let courtId, hour;
@@ -269,8 +313,8 @@ async function init() {
       const start = `${dateStr} ${String(hour).padStart(2, '0')}:00`;
       const end = `${dateStr} ${String(hour + 1).padStart(2, '0')}:00`;
       
-      // Random player 1-5
-      const playerId = Math.floor(Math.random() * 5) + 1;
+      // Random player 1-10
+      const playerId = Math.floor(Math.random() * 10) + 1;
       const status = 'booked';
       const price = [100000, 150000, 200000][Math.floor(Math.random() * 3)];
       
@@ -294,37 +338,6 @@ async function init() {
         await run('INSERT INTO payments (player_id, amount_cents, currency, source_type, source_id, method, status) VALUES (?, ?, ?, ?, ?, ?, ?)',
           [playerId, price, 'VND', 'reservation', res.insertId, method, 'succeeded']);
         console.log(`    💰 Payment created: ${orderCode} → ${formatCurrency(price)} via ${method}`);
-      }
-    }
-
-    // Check if this date has an event
-    const eventForDate = eventDates.find(e => e.date === dateStr);
-    if (eventForDate) {
-      const [startHour, endHour] = eventForDate.time.split('-').map(t => {
-        const [h] = t.split(':');
-        return parseInt(h);
-      });
-      const eventStart = `${dateStr} ${String(startHour).padStart(2, '0')}:00`;
-      const eventEnd = `${dateStr} ${String(endHour).padStart(2, '0')}:00`;
-      
-      const eventRes = await run('INSERT INTO events (name, description, court_id, start_time, end_time, max_participants, fee_cents, status) VALUES (?,?,?,?,?,?,?,?)', [
-        eventForDate.name,
-        `Sự kiện ${eventForDate.name}`,
-        eventForDate.court,
-        eventStart,
-        eventEnd,
-        Math.floor(Math.random() * 8) + 8, // 8-16 người
-        [0, 50000, 100000, 150000][Math.floor(Math.random() * 4)],
-        'open'
-      ]);
-
-      // Add 2-4 random registrations for each event
-      const numRegs = Math.floor(Math.random() * 3) + 2;
-      for (let r = 0; r < numRegs; r++) {
-        const regPlayerId = Math.floor(Math.random() * 5) + 1;
-        const regPaid = Math.random() < 0.5 ? 'paid' : 'unpaid';
-        await run('INSERT INTO event_registrations (event_id, player_id, payment_status, status) VALUES (?, ?, ?, "registered")',
-          [eventRes.insertId, regPlayerId, regPaid]);
       }
     }
 
