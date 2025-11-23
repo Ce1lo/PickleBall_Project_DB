@@ -54,7 +54,6 @@ Theo mặc định, server lắng nghe tại cổng `3000`. Bạn có thể truy
 - **init_db.js**: script tạo và seed database MySQL.
 - **index.html**: giao diện người dùng đơn giản (SPA) để tương tác với API.
 - **slides/**: thư mục chứa file trình chiếu (không ảnh hưởng tới chạy ứng dụng).
-- **database.sqlite**: file CSDL SQLite cũ (giữ lại để tham khảo, ứng dụng không còn dùng).
 
 ## 6. Gợi ý triển khai production
 
