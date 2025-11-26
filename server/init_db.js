@@ -1,8 +1,5 @@
 import mysql from 'mysql2/promise';
 
-// Initialize and populate a MySQL database with a simplified schema and some seed data.
-// The connection uses environment variables when available, otherwise defaults
-// to typical local development settings.  See index.js for details.
 const pool = mysql.createPool({
   host: process.env.MYSQL_HOST || 'localhost',
   port: process.env.MYSQL_PORT ? parseInt(process.env.MYSQL_PORT, 10) : 3306,
@@ -20,9 +17,6 @@ async function run(query, params = []) {
 }
 
 async function init() {
-  // Drop tables if they exist for a fresh start.  MySQL does not allow
-  // dropping multiple tables in a single statement when using prepared
-  // statements, so we loop.
   const dropQueries = [
     'DROP TABLE IF EXISTS reservation_players',
     'DROP TABLE IF EXISTS reservations',
@@ -44,10 +38,6 @@ async function init() {
     }
   }
 
-  // Create tables with MySQL‑compatible definitions.  We use appropriate
-  // column types (INT, VARCHAR, DATE/DATETIME) and ENUMs to mirror the
-  // original SQLite schema.  Additional columns such as payment_status have
-  // been added to reservations to match the API implementation in index.js.
   await run(`
     CREATE TABLE IF NOT EXISTS players (
       id INT AUTO_INCREMENT PRIMARY KEY,
@@ -190,7 +180,6 @@ async function init() {
     )
   `);
 
-  // Seed some sample data
   // Seed some sample data
   const players = [
     ['Nguyễn Văn An', '0901234567', 'an.nguyen@example.com', 'active', '2025-12-31'],
